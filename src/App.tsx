@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useState } from 'react'
 import './styles.css'
-import { href, navigate, useRoute } from './lib/router'
+import { href, navigate, scrollToTop, useRoute } from './lib/router'
 import { PAGE_TITLES, toolByPath } from './lib/tools'
 import { REPO_URL } from './lib/site'
 import {
@@ -78,6 +78,11 @@ function AppShell() {
   useEffect(() => {
     document.title = PAGE_TITLES[route.name] ?? 'Toolbox'
   }, [route.name])
+
+  useEffect(() => {
+    if (route.name === 'home') return
+    scrollToTop()
+  }, [route.path, route.name])
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {

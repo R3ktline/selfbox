@@ -1582,6 +1582,7 @@ button.quick-access-link {
 .home-below-fold-content {
   opacity: 0;
   transition: opacity 0.35s ease 0.04s;
+  overflow-anchor: none;
 }
 .home-below-fold.is-visible .home-below-fold-content {
   opacity: 1;
@@ -1842,6 +1843,7 @@ button.quick-access-link {
   gap: 10px;
   margin: 0 -2px 36px;
   padding: 4px 2px;
+  scroll-margin-top: 24px;
 }
 .category-card {
   appearance: none;
@@ -1936,6 +1938,11 @@ button.quick-access-link {
   border-radius: 999px;
   padding: 2px 7px;
   z-index: 1;
+}
+
+.home-section-group,
+.home-section[data-group-section] {
+  scroll-margin-top: 20px;
 }
 
 .home-section-group {

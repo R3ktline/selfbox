@@ -72,8 +72,14 @@ export function getRoute(): Route {
   return { name, path }
 }
 
+export function scrollToTop(): void {
+  window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
+}
+
 export function navigate(path: string): void {
-  window.location.hash = path
+  const next = path.startsWith('/') ? path : `/${path}`
+  if (currentPath() === next) return
+  window.location.hash = next
 }
 
 export function useRoute(): Route {

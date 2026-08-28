@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type DragEvent } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type DragEvent, type RefObject } from 'react'
 import { href } from '../lib/router'
 import {
   formatFileList,
@@ -13,6 +13,7 @@ import {
   searchTools,
   TOOLS,
   type HomeFilter,
+  type ToolGroup,
   type ToolMeta,
 } from '../lib/tools'
 import { GroupIcon, ToolIcon } from '../components/ToolIcons'
@@ -116,6 +117,62 @@ function QuickAccessLink({
   )
 }
 
+const BELOW_FOLD_REVEAL_MS = 480
+const CATEGORY_SCROLL_OFFSET = 24
+
+function getScrollTopFor(el: Element): number {
+  return Math.max(0, el.getBoundingClientRect().top + window.scrollY - CATEGORY_SCROLL_OFFSET)
+}
+
+function isNearAnchor(el: Element, threshold = 48): boolean {
+  return Math.abs(el.getBoundingClientRect().top - CATEGORY_SCROLL_OFFSET) <= threshold
+}
+
+function scrollToAnchor(el: Element, behavior: ScrollBehavior = 'smooth'): Promise<void> {
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  const resolved = reducedMotion ? 'auto' : behavior
+  const top = getScrollTopFor(el)
+
+  if (resolved === 'auto') {
+    window.scrollTo({ top, left: 0, behavior: 'auto' })
+    return Promise.resolve()
+  }
+
+  return new Promise((resolve) => {
+    let done = false
+    const finish = () => {
+      if (done) return
+      done = true
+      window.removeEventListener('scrollend', onScrollEnd)
+      window.clearTimeout(fallback)
+      resolve()
+    }
+    const onScrollEnd = () => finish()
+    const fallback = window.setTimeout(finish, 500)
+    window.addEventListener('scrollend', onScrollEnd, { once: true })
+    window.scrollTo({ top, left: 0, behavior: 'smooth' })
+  })
+}
+
+function scheduleScrollToAnchor(anchorRef: RefObject<HTMLElement | null>, waitForReveal: boolean) {
+  const runScroll = () => {
+    const el = anchorRef.current
+    if (!el) return
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        void scrollToAnchor(el, 'smooth')
+      })
+    })
+  }
+
+  if (waitForReveal) {
+    window.setTimeout(runScroll, BELOW_FOLD_REVEAL_MS)
+    return
+  }
+
+  runScroll()
+}
+
 export default function Home() {
   const [query, setQuery] = useState('')
   const [group, setGroup] = useState<HomeFilter>('All')
@@ -125,6 +182,7 @@ export default function Home() {
   const [belowRevealed, setBelowRevealed] = useState(false)
   const [hintPhase, setHintPhase] = useState<'visible' | 'hiding' | 'gone'>('visible')
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const categoryShowcaseRef = useRef<HTMLElement>(null)
 
   const suggestions = useMemo(() => suggestToolsForFiles(files), [files])
   const browsingAll = group === 'All' && !query.trim()
@@ -194,6 +252,40 @@ export default function Home() {
       window.removeEventListener('keydown', onKeyDown)
     }
   }, [browsingAll, belowRevealed, revealBelow])
+
+  const onCategoryClick = useCallback(
+    (g: ToolGroup) => {
+      const next = group === g ? 'All' : g
+      const needsReveal = browsingAll && !belowRevealed
+      const switchingFilter = group !== 'All' && next !== 'All'
+      const anchor = categoryShowcaseRef.current
+
+      if (next === 'All') {
+        setGroup('All')
+        return
+      }
+
+      const applyFilter = () => {
+        setGroup(next)
+        if (!switchingFilter) {
+          scheduleScrollToAnchor(categoryShowcaseRef, needsReveal)
+        }
+      }
+
+      if (switchingFilter && anchor) {
+        if (isNearAnchor(anchor)) {
+          applyFilter()
+          return
+        }
+        void scrollToAnchor(anchor, 'smooth').then(applyFilter)
+        return
+      }
+
+      if (needsReveal) revealBelow()
+      applyFilter()
+    },
+    [group, browsingAll, belowRevealed, revealBelow],
+  )
 
   const addFiles = useCallback((list: FileList | null) => {
     if (!list || list.length === 0) return
@@ -353,7 +445,7 @@ export default function Home() {
         >
           <div className="home-below-fold-inner">
             <div className="home-below-fold-content">
-        <section className="category-showcase" aria-label="Tool categories">
+        <section ref={categoryShowcaseRef} className="category-showcase" aria-label="Tool categories">
           {GROUP_ORDER.map((g) => {
             const meta = GROUP_META[g]
             const count = TOOLS.filter((t) => t.group === g).length
@@ -363,7 +455,7 @@ export default function Home() {
                 type="button"
                 className={'category-card' + (group === g ? ' active' : '')}
                 data-group={g}
-                onClick={() => setGroup(group === g ? 'All' : g)}
+                onClick={() => onCategoryClick(g)}
                 aria-pressed={group === g}
               >
                 <span className="category-card-icon">
@@ -381,7 +473,7 @@ export default function Home() {
 
         {grouped ? (
           grouped.map(({ group: g, tools }) => (
-            <section key={g} className="home-section home-section-group" data-group={g}>
+            <section key={g} className="home-section home-section-group" data-group={g} data-group-section={g}>
               <header className="group-header">
                 <span className="group-header-icon" data-group={g}>
                   <GroupIcon group={g} size={18} />
@@ -399,7 +491,7 @@ export default function Home() {
             </section>
           ))
         ) : (
-          <section className="home-section">
+          <section className="home-section" data-group-section={group !== 'All' ? group : undefined}>
             <h2>
               {items.length} {items.length === 1 ? 'tool' : 'tools'}
               {group !== 'All' && ` · ${GROUP_META[group].label}`}
