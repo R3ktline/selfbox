@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#050505" />
+    <script>
+      (function () {
+        var key = 'qrgen.theme.v2';
+        var legacy = 'qrgen.theme.v1';
+        var mode = 'system';
+        try {
+          var stored = localStorage.getItem(key);
+          if (stored === 'system' || stored === 'light' || stored === 'dark') {
+            mode = stored;
+          } else {
+            var old = localStorage.getItem(legacy);
+            if (old === 'light' || old === 'dark') mode = old;
+          }
+        } catch (e) {}
+        var resolved =
+          mode === 'system'
+            ? window.matchMedia('(prefers-color-scheme: light)').matches
+              ? 'light'
+              : 'dark'
+            : mode;
+        document.documentElement.setAttribute('data-theme', resolved);
+        var meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) meta.setAttribute('content', resolved === 'dark' ? '#050505' : '#f4f4f1');
+      })();
+    </script>
+    <meta name="description" content="Local-first browser tools: QR codes, image and PDF utilities, JSON/CSV, and converters. Nothing is uploaded." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <title>Your personal toolbox — self-hosted</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
