@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" fill="none">
+  <rect width="1200" height="630" fill="#050505"/>
+  <defs>
+    <pattern id="dots" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="12" cy="12" r="1" fill="rgba(255,255,255,0.045)"/>
+    </pattern>
+    <linearGradient id="glow" x1="0" y1="0" x2="1200" y2="630" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#ff4433" stop-opacity="0.18"/>
+      <stop offset="0.55" stop-color="#050505" stop-opacity="0"/>
+      <stop offset="1" stop-color="#00e5c7" stop-opacity="0.1"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#dots)"/>
+  <rect width="1200" height="630" fill="url(#glow)"/>
+  <rect x="80" y="80" width="1040" height="470" rx="16" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+  <rect x="80" y="80" width="1040" height="470" rx="16" fill="rgba(255,255,255,0.02)"/>
+
+  <!-- logo grid -->
+  <g transform="translate(120,120)">
+    <rect width="48" height="48" rx="8" fill="#111"/>
+    <circle cx="12" cy="12" r="3" fill="#ff4433"/>
+    <circle cx="24" cy="12" r="3" fill="#ff4433"/>
+    <circle cx="36" cy="12" r="3" fill="#5c5c5c"/>
+    <circle cx="12" cy="24" r="3" fill="#5c5c5c"/>
+    <circle cx="24" cy="24" r="3" fill="#ff4433"/>
+    <circle cx="36" cy="24" r="3" fill="#5c5c5c"/>
+    <circle cx="12" cy="36" r="3" fill="#5c5c5c"/>
+    <circle cx="24" cy="36" r="3" fill="#ff4433"/>
+    <circle cx="36" cy="36" r="3" fill="#00e5c7"/>
+  </g>
+
+  <text x="190" y="152" fill="#ededed" font-family="ui-sans-serif, system-ui, sans-serif" font-size="28" font-weight="700" letter-spacing="0.08em">TOOLBOX</text>
+  <text x="120" y="220" fill="#ff4433" font-family="ui-monospace, monospace" font-size="14" letter-spacing="0.12em">24 UTILITIES · LOCAL · ZERO-SERVER</text>
+  <text x="120" y="290" fill="#ededed" font-family="ui-sans-serif, system-ui, sans-serif" font-size="56" font-weight="800" letter-spacing="-0.02em">Your personal toolbox</text>
+  <text x="120" y="350" fill="#9a9a9a" font-family="ui-sans-serif, system-ui, sans-serif" font-size="32" font-weight="500">self-hosted.</text>
+  <text x="120" y="410" fill="#9a9a9a" font-family="ui-sans-serif, system-ui, sans-serif" font-size="20">QR codes · images · PDFs · dev utilities · media tools</text>
+
+  <!-- category pills -->
+  <g transform="translate(120,450)">
+    <rect width="92" height="36" rx="8" fill="rgba(255,68,51,0.12)" stroke="rgba(255,68,51,0.35)"/>
+    <text x="46" y="23" fill="#ff4433" font-family="ui-sans-serif, system-ui, sans-serif" font-size="13" font-weight="600" text-anchor="middle">Design</text>
+    <rect x="104" width="92" height="36" rx="8" fill="rgba(52,211,153,0.1)" stroke="rgba(52,211,153,0.3)"/>
+    <text x="150" y="23" fill="#34d399" font-family="ui-sans-serif, system-ui, sans-serif" font-size="13" font-weight="600" text-anchor="middle">Image</text>
+    <rect x="208" width="92" height="36" rx="8" fill="rgba(251,191,36,0.1)" stroke="rgba(251,191,36,0.3)"/>
+    <text x="254" y="23" fill="#fbbf24" font-family="ui-sans-serif, system-ui, sans-serif" font-size="13" font-weight="600" text-anchor="middle">PDF</text>
+    <rect x="312" width="92" height="36" rx="8" fill="rgba(56,189,248,0.1)" stroke="rgba(56,189,248,0.3)"/>
+    <text x="358" y="23" fill="#38bdf8" font-family="ui-sans-serif, system-ui, sans-serif" font-size="13" font-weight="600" text-anchor="middle">Dev</text>
+    <rect x="416" width="92" height="36" rx="8" fill="rgba(0,229,199,0.1)" stroke="rgba(0,229,199,0.3)"/>
+    <text x="462" y="23" fill="#00e5c7" font-family="ui-sans-serif, system-ui, sans-serif" font-size="13" font-weight="600" text-anchor="middle">Media</text>
+  </g>
+
+  <!-- decorative window mock -->
+  <g transform="translate(700,130)">
+    <rect width="360" height="260" rx="12" fill="#0a0a0a" stroke="rgba(255,255,255,0.1)"/>
+    <rect width="360" height="28" rx="12" fill="#111"/>
+    <rect y="14" width="360" height="14" fill="#111"/>
+    <circle cx="18" cy="14" r="4" fill="#ff4433"/>
+    <circle cx="32" cy="14" r="4" fill="#5c5c5c"/>
+    <circle cx="46" cy="14" r="4" fill="#5c5c5c"/>
+    <rect x="24" y="52" width="312" height="24" rx="6" fill="#111" stroke="rgba(255,255,255,0.06)"/>
+    <rect x="24" y="92" width="148" height="72" rx="8" fill="#111" stroke="rgba(255,68,51,0.25)"/>
+    <rect x="188" y="92" width="148" height="72" rx="8" fill="#111" stroke="rgba(255,255,255,0.06)"/>
+    <rect x="24" y="180" width="312" height="56" rx="8" fill="#111" stroke="rgba(255,255,255,0.06)"/>
+    <rect x="36" y="104" width="48" height="48" rx="6" fill="rgba(255,68,51,0.15)"/>
+    <rect x="200" y="104" width="48" height="48" rx="6" fill="rgba(52,211,153,0.15)"/>
+  </g>
+</svg>
