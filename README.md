@@ -356,4 +356,4 @@ Issues and pull requests welcome at [github.com/R3ktline/selfbox](https://github
 
 ## License
 
-Provided as-is for personal and self-hosted use. Add a `LICENSE` file if you redistribute a fork.
+MIT — see [LICENSE](LICENSE).
