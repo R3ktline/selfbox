@@ -151,16 +151,15 @@ const ICONS: Record<ToolIconId, ReactNode> = {
   <>
     <path d="M7 3h7l5 5v13a1 1 0 01-1 1H7a1 1 0 01-1-1V4a1 1 0 011-1z" />
     <path d="M14 3v5h5" />
-    <path d="M9 12h6M9 16h4" />
-    <path d="M12 8v8M8 12h8" />
+    <rect x="11" y="9.75" width="2" height="7.5" rx="0.5" fill="currentColor" stroke="none" />
+    <rect x="8.75" y="12.5" width="6.5" height="2" rx="0.5" fill="currentColor" stroke="none" />
   </>
   ),
   'pdf-split': (
   <>
-    <path d="M7 3h7l5 5v13a1 1 0 01-1 1H7a1 1 0 01-1-1V4a1 1 0 011-1z" />
-    <path d="M14 3v5h5" />
-    <path d="M12 9v10" />
-    <path d="M9 12h6" />
+    <path d="M4 5h5.5l-.9 2.3L9 11l-1.4 2.6L9 16l-.9 2.3H4a1 1 0 01-1-1V6a1 1 0 011-1z" />
+    <path d="M12 4h6l3 3v13a1 1 0 01-1 1h-8V4z" />
+    <path d="M18 4v3h3" />
   </>
   ),
   'pdf-images': (
@@ -174,15 +173,15 @@ const ICONS: Record<ToolIconId, ReactNode> = {
   <>
     <path d="M7 3h7l5 5v13a1 1 0 01-1 1H7a1 1 0 01-1-1V4a1 1 0 011-1z" />
     <path d="M14 3v5h5" />
-    <path d="M8 13h8M8 17h5" />
-    <path d="M16 16l2 2 3-4" />
+    <path d="M8 11h8M8 14h5" />
+    <path d="M11 17.5l2 2 5-6" strokeWidth="2.75" strokeLinecap="round" strokeLinejoin="round" />
   </>
   ),
   'pdf-optimize': (
   <>
     <path d="M7 3h7l5 5v13a1 1 0 01-1 1H7a1 1 0 01-1-1V4a1 1 0 011-1z" />
     <path d="M14 3v5h5" />
-    <path d="M9 14l2-3 2 3 2-5" />
+    <path d="M9 17l2-3 2 3 2-5" />
   </>
   ),
   gif: (

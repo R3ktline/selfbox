@@ -14,6 +14,27 @@ export interface ToolMeta {
 
 export const GROUP_ORDER: ToolGroup[] = ['Design', 'Image', 'PDF', 'Dev', 'Media']
 
+export type HomeFilter = ToolGroup | 'All'
+
+export const MOST_USED_PATHS = [
+  '/qr',
+  '/pdf/pages',
+  '/pdf/split-export',
+  '/pdf/from-images',
+  '/pdf/ocr',
+  '/pdf/optimize',
+] as const
+
+export const MOST_USED_META = {
+  label: 'Quick access',
+  tagline: 'QR & PDF',
+  desc: 'QR codes and PDF tools — the ones you reach for most.',
+}
+
+export function mostUsedTools(): ToolMeta[] {
+  return MOST_USED_PATHS.map((path) => toolByPath(path)).filter((t): t is ToolMeta => t !== undefined)
+}
+
 export const GROUP_META: Record<
   ToolGroup,
   { label: string; tagline: string; desc: string }
@@ -102,8 +123,8 @@ export const TOOLS: ToolMeta[] = [
   },
   {
     path: '/pdf/pages',
-    title: 'PDF Page Editor',
-    short: 'Pages',
+    title: 'Page Edit',
+    short: 'Page Edit',
     desc: 'Merge PDFs, reorder pages, rotate, or delete pages.',
     group: 'PDF',
     icon: 'pdf-pages',
@@ -120,8 +141,8 @@ export const TOOLS: ToolMeta[] = [
   },
   {
     path: '/pdf/from-images',
-    title: 'Images to PDF',
-    short: 'To PDF',
+    title: 'Image to PDF',
+    short: 'Image to PDF',
     desc: 'Combine images into a single PDF with drag-to-reorder.',
     group: 'PDF',
     icon: 'pdf-images',
@@ -129,8 +150,8 @@ export const TOOLS: ToolMeta[] = [
   },
   {
     path: '/pdf/ocr',
-    title: 'PDF Text Extract',
-    short: 'OCR',
+    title: 'Extract Text from PDF',
+    short: 'Extract Text from PDF',
     desc: 'Extract text with pdf.js and OCR fallback for scans.',
     group: 'PDF',
     icon: 'pdf-ocr',
@@ -289,10 +310,10 @@ export const PAGE_TITLES: Record<string, string> = {
   'image-convert': 'Image Converter — Toolbox',
   'image-palette': 'Color Palette — Toolbox',
   pdf: 'PDF Tools — Toolbox',
-  'pdf-pages': 'PDF Page Editor — Toolbox',
+  'pdf-pages': 'Page Edit — Toolbox',
   'pdf-split-export': 'PDF Split & Export — Toolbox',
-  'pdf-from-images': 'Images to PDF — Toolbox',
-  'pdf-ocr': 'PDF Text Extract — Toolbox',
+  'pdf-from-images': 'Image to PDF — Toolbox',
+  'pdf-ocr': 'Extract Text from PDF — Toolbox',
   'pdf-optimize': 'PDF Optimize — Toolbox',
   favicon: 'Favicon Generator — Toolbox',
   screenshot: 'Screenshot Beautifier — Toolbox',

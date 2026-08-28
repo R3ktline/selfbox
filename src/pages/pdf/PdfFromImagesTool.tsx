@@ -4,7 +4,7 @@ export default function PdfFromImagesTool() {
   return (
     <PdfToolView
       variant="images"
-      title="Images to PDF"
+      title="Image to PDF"
       hint="Drop images, drag to set page order, then create a PDF."
     />
   )

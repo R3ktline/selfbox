@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect, useState } from 'react'
 import './styles.css'
 import { href, navigate, useRoute } from './lib/router'
 import { PAGE_TITLES, toolByPath } from './lib/tools'
+import { REPO_URL } from './lib/site'
 import {
   applyTheme,
   loadThemeMode,
@@ -188,6 +189,13 @@ function AppShell() {
         <button type="button" className="btn-link" onClick={() => setCmdOpen(true)}>
           Open command palette
         </button>
+        <span className="footer-sep" aria-hidden="true">·</span>
+        <a className="footer-link" href={REPO_URL} target="_blank" rel="noreferrer">
+          <svg width="14" height="14" aria-hidden="true">
+            <use href="/icons.svg#github-icon" />
+          </svg>
+          GitHub
+        </a>
       </footer>
 
       <CommandPalette open={cmdOpen} onClose={() => setCmdOpen(false)} />

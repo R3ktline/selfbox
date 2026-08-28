@@ -1,11 +1,20 @@
-import { useCallback, useMemo, useRef, useState, type DragEvent } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type DragEvent } from 'react'
 import { href } from '../lib/router'
 import {
   formatFileList,
   navigateWithFiles,
   suggestToolsForFiles,
 } from '../lib/fileStore'
-import { GROUP_META, GROUP_ORDER, searchTools, TOOLS, type ToolGroup, type ToolMeta } from '../lib/tools'
+import {
+  GROUP_META,
+  GROUP_ORDER,
+  MOST_USED_META,
+  mostUsedTools,
+  searchTools,
+  TOOLS,
+  type HomeFilter,
+  type ToolMeta,
+} from '../lib/tools'
 import { GroupIcon, ToolIcon } from '../components/ToolIcons'
 
 function ToolCard({ tool, files, onNavigate }: { tool: ToolMeta; files: File[]; onNavigate: (path: string) => void }) {
@@ -74,14 +83,51 @@ function SuggestedToolCard({ tool, onNavigate }: { tool: ToolMeta; onNavigate: (
   )
 }
 
+function QuickAccessLink({
+  tool,
+  files,
+  onNavigate,
+}: {
+  tool: ToolMeta
+  files: File[]
+  onNavigate: (path: string) => void
+}) {
+  const content = (
+    <>
+      <span className="quick-access-icon" data-group={tool.group}>
+        <ToolIcon id={tool.icon} size={18} />
+      </span>
+      <span className="quick-access-label">{tool.short}</span>
+    </>
+  )
+
+  if (files.length > 0) {
+    return (
+      <button type="button" className="quick-access-link" data-group={tool.group} onClick={() => onNavigate(tool.path)}>
+        {content}
+      </button>
+    )
+  }
+
+  return (
+    <a className="quick-access-link" href={href(tool.path)} data-group={tool.group}>
+      {content}
+    </a>
+  )
+}
+
 export default function Home() {
   const [query, setQuery] = useState('')
-  const [group, setGroup] = useState<ToolGroup | 'All'>('All')
+  const [group, setGroup] = useState<HomeFilter>('All')
+  const mostUsed = useMemo(() => mostUsedTools(), [])
   const [files, setFiles] = useState<File[]>([])
   const [dragOver, setDragOver] = useState(false)
+  const [belowRevealed, setBelowRevealed] = useState(false)
+  const [hintPhase, setHintPhase] = useState<'visible' | 'hiding' | 'gone'>('visible')
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const suggestions = useMemo(() => suggestToolsForFiles(files), [files])
+  const browsingAll = group === 'All' && !query.trim()
 
   const items = useMemo(() => {
     const found = searchTools(query)
@@ -95,6 +141,59 @@ export default function Home() {
       tools: TOOLS.filter((t) => t.group === g),
     })).filter((s) => s.tools.length > 0)
   }, [group, query])
+
+  useEffect(() => {
+    if (!browsingAll) {
+      setBelowRevealed(true)
+      setHintPhase('gone')
+      return
+    }
+
+    setBelowRevealed(false)
+    setHintPhase('visible')
+  }, [browsingAll])
+
+  const revealBelow = useCallback(() => {
+    if (belowRevealed || hintPhase === 'hiding') return
+    setHintPhase('hiding')
+    window.setTimeout(() => {
+      setHintPhase('gone')
+      setBelowRevealed(true)
+    }, 180)
+  }, [belowRevealed, hintPhase])
+
+  useEffect(() => {
+    if (!browsingAll || belowRevealed) return
+
+    const onWheel = (e: WheelEvent) => {
+      if (e.deltaY > 8) revealBelow()
+    }
+
+    let touchStartY = 0
+    const onTouchStart = (e: TouchEvent) => {
+      touchStartY = e.touches[0]?.clientY ?? 0
+    }
+    const onTouchMove = (e: TouchEvent) => {
+      const y = e.touches[0]?.clientY ?? touchStartY
+      if (touchStartY - y > 36) revealBelow()
+    }
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') revealBelow()
+    }
+
+    window.addEventListener('wheel', onWheel, { passive: true })
+    window.addEventListener('touchstart', onTouchStart, { passive: true })
+    window.addEventListener('touchmove', onTouchMove, { passive: true })
+    window.addEventListener('keydown', onKeyDown)
+
+    return () => {
+      window.removeEventListener('wheel', onWheel)
+      window.removeEventListener('touchstart', onTouchStart)
+      window.removeEventListener('touchmove', onTouchMove)
+      window.removeEventListener('keydown', onKeyDown)
+    }
+  }, [browsingAll, belowRevealed, revealBelow])
 
   const addFiles = useCallback((list: FileList | null) => {
     if (!list || list.length === 0) return
@@ -128,51 +227,78 @@ export default function Home() {
     if (e.dataTransfer.files.length) addFiles(e.dataTransfer.files)
   }
 
+  const showScrollHint = browsingAll && hintPhase !== 'gone'
+  const belowVisible = belowRevealed || !browsingAll
+
   return (
     <main className="home" id="main">
-      <section className="home-hero home-hero-left">
-        <p className="kicker">{TOOLS.length} utilities · runs in your browser</p>
+      <section className="home-hero home-hero-left home-hero-compact">
         <h1>
           Your personal toolbox
           <em>self-hosted.</em>
         </h1>
-        <p>
-          QR codes, images, PDFs, and formatters — all processed in-tab. Close the window and your data is gone
-          unless you save it.
-        </p>
 
-        <div
-          className={'home-file-drop' + (dragOver ? ' active' : '') + (files.length > 0 ? ' has-files' : '')}
-          onDragOver={(e) => {
-            e.preventDefault()
-            setDragOver(true)
-          }}
-          onDragLeave={() => setDragOver(false)}
-          onDrop={onDrop}
-          onClick={() => fileInputRef.current?.click()}
-          role="button"
-          tabIndex={0}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') fileInputRef.current?.click()
-          }}
-        >
-          <input
-            ref={fileInputRef}
-            type="file"
-            multiple
-            hidden
-            onChange={(e) => {
-              addFiles(e.target.files)
-              if (fileInputRef.current) fileInputRef.current.value = ''
-            }}
-          />
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
-            <path d="M12 16V4m0 0L8 8m4-4l4 4" strokeLinecap="round" strokeLinejoin="round" />
-            <path d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2" strokeLinecap="round" />
+        <label className="home-search">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+            <circle cx="11" cy="11" r="7" />
+            <path d="M21 21l-4.3-4.3" />
           </svg>
-          <div className="home-file-drop-text">
-            <strong>{dragOver ? 'Drop to add files' : files.length > 0 ? formatFileList(files) : 'Drop files or click to browse'}</strong>
-            <span className="meta">We&apos;ll suggest the right tools for your files</span>
+          <input
+            type="search"
+            placeholder="Filter tools…"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            autoComplete="off"
+          />
+          <kbd className="kbd">⌘K</kbd>
+        </label>
+
+        <div className="home-action-row">
+          <div className="quick-access-panel" aria-label="Quick access tools">
+            <div className="quick-access-header">
+              <h2>{MOST_USED_META.label}</h2>
+              <p>{MOST_USED_META.desc}</p>
+            </div>
+            <div className="quick-access-grid">
+              {mostUsed.map((t) => (
+                <QuickAccessLink key={t.path} tool={t} files={files} onNavigate={onNavigateWithFiles} />
+              ))}
+            </div>
+          </div>
+
+          <div
+            className={'home-upload-square' + (dragOver ? ' active' : '') + (files.length > 0 ? ' has-files' : '')}
+            onDragOver={(e) => {
+              e.preventDefault()
+              setDragOver(true)
+            }}
+            onDragLeave={() => setDragOver(false)}
+            onDrop={onDrop}
+            onClick={() => fileInputRef.current?.click()}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') fileInputRef.current?.click()
+            }}
+          >
+            <input
+              ref={fileInputRef}
+              type="file"
+              multiple
+              hidden
+              onChange={(e) => {
+                addFiles(e.target.files)
+                if (fileInputRef.current) fileInputRef.current.value = ''
+              }}
+            />
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+              <path d="M12 16V4m0 0L8 8m4-4l4 4" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2" strokeLinecap="round" />
+            </svg>
+            <div className="home-upload-square-text">
+              <strong>{dragOver ? 'Drop to add' : files.length > 0 ? formatFileList(files) : 'Drop files'}</strong>
+              <span className="meta">or click to browse</span>
+            </div>
           </div>
         </div>
 
@@ -202,85 +328,97 @@ export default function Home() {
             </div>
           </section>
         )}
-
-        <label className="home-search">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-            <circle cx="11" cy="11" r="7" />
-            <path d="M21 21l-4.3-4.3" />
-          </svg>
-          <input
-            type="search"
-            placeholder="Filter tools…"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            autoComplete="off"
-          />
-          <kbd className="kbd">⌘K</kbd>
-        </label>
       </section>
 
-      <section className="category-showcase" aria-label="Tool categories">
-        {GROUP_ORDER.map((g) => {
-          const meta = GROUP_META[g]
-          const count = TOOLS.filter((t) => t.group === g).length
-          return (
-            <button
-              key={g}
-              type="button"
-              className={'category-card' + (group === g ? ' active' : '')}
-              data-group={g}
-              onClick={() => setGroup(group === g ? 'All' : g)}
-              aria-pressed={group === g}
-            >
-              <span className="category-card-icon">
-                <GroupIcon group={g} size={22} />
-              </span>
-              <span className="category-card-body">
-                <span className="category-card-name">{meta.label}</span>
-                <span className="category-card-tagline">{meta.tagline}</span>
-              </span>
-              <span className="category-card-count">{count}</span>
-            </button>
-          )
-        })}
-      </section>
+      <div className="home-reveal-zone">
+        {showScrollHint && (
+          <button
+            type="button"
+            className={'home-scroll-hint' + (hintPhase === 'hiding' ? ' is-hiding' : '')}
+            onClick={revealBelow}
+          >
+            <span>More tools below</span>
+            <svg className="home-scroll-hint-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+              <path d="M6 9l6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
+        )}
 
-      {grouped ? (
-        grouped.map(({ group: g, tools }) => (
-          <section key={g} className="home-section home-section-group" data-group={g}>
-            <header className="group-header">
-              <span className="group-header-icon" data-group={g}>
-                <GroupIcon group={g} size={18} />
-              </span>
-              <div className="group-header-text">
-                <h2>{GROUP_META[g].label}</h2>
-                <p>{GROUP_META[g].desc}</p>
-              </div>
-            </header>
-            <div className="tool-grid">
-              {tools.map((t) => (
-                <ToolCard key={t.path} tool={t} files={files} onNavigate={onNavigateWithFiles} />
-              ))}
-            </div>
-          </section>
-        ))
-      ) : (
-        <section className="home-section">
-          <h2>
-            {items.length} {items.length === 1 ? 'tool' : 'tools'}
-            {group !== 'All' && ` · ${GROUP_META[group].label}`}
-          </h2>
-          {items.length === 0 ? (
-            <p className="hint">No matches. Clear the filter or press ⌘K to search titles and keywords.</p>
-          ) : (
-            <div className="tool-grid">
-              {items.map((t) => (
-                <ToolCard key={t.path} tool={t} files={files} onNavigate={onNavigateWithFiles} />
-              ))}
-            </div>
-          )}
+        <div
+          className={
+            'home-below-fold' +
+            (belowVisible ? ' is-visible' : '') +
+            (!browsingAll ? ' is-instant' : '')
+          }
+        >
+          <div className="home-below-fold-inner">
+            <div className="home-below-fold-content">
+        <section className="category-showcase" aria-label="Tool categories">
+          {GROUP_ORDER.map((g) => {
+            const meta = GROUP_META[g]
+            const count = TOOLS.filter((t) => t.group === g).length
+            return (
+              <button
+                key={g}
+                type="button"
+                className={'category-card' + (group === g ? ' active' : '')}
+                data-group={g}
+                onClick={() => setGroup(group === g ? 'All' : g)}
+                aria-pressed={group === g}
+              >
+                <span className="category-card-icon">
+                  <GroupIcon group={g} size={22} />
+                </span>
+                <span className="category-card-body">
+                  <span className="category-card-name">{meta.label}</span>
+                  <span className="category-card-tagline">{meta.tagline}</span>
+                </span>
+                <span className="category-card-count">{count}</span>
+              </button>
+            )
+          })}
         </section>
-      )}
+
+        {grouped ? (
+          grouped.map(({ group: g, tools }) => (
+            <section key={g} className="home-section home-section-group" data-group={g}>
+              <header className="group-header">
+                <span className="group-header-icon" data-group={g}>
+                  <GroupIcon group={g} size={18} />
+                </span>
+                <div className="group-header-text">
+                  <h2>{GROUP_META[g].label}</h2>
+                  <p>{GROUP_META[g].desc}</p>
+                </div>
+              </header>
+              <div className="tool-grid">
+                {tools.map((t) => (
+                  <ToolCard key={t.path} tool={t} files={files} onNavigate={onNavigateWithFiles} />
+                ))}
+              </div>
+            </section>
+          ))
+        ) : (
+          <section className="home-section">
+            <h2>
+              {items.length} {items.length === 1 ? 'tool' : 'tools'}
+              {group !== 'All' && ` · ${GROUP_META[group].label}`}
+            </h2>
+            {items.length === 0 ? (
+              <p className="hint">No matches. Clear the filter or press ⌘K to search titles and keywords.</p>
+            ) : (
+              <div className="tool-grid">
+                {items.map((t) => (
+                  <ToolCard key={t.path} tool={t} files={files} onNavigate={onNavigateWithFiles} />
+                ))}
+              </div>
+            )}
+          </section>
+        )}
+          </div>
+        </div>
+      </div>
+      </div>
     </main>
   )
 }
