@@ -4,6 +4,8 @@ import { mediaApiMiddleware } from './server/media-api.js'
 
 // https://vite.dev/config/
 export default defineConfig({
+  // GitHub Pages project site: https://r3ktline.github.io/selfbox/
+  base: process.env.GITHUB_PAGES === 'true' ? '/selfbox/' : '/',
   assetsInclude: ['**/*.aff', '**/*.dic'],
   plugins: [
     react(),

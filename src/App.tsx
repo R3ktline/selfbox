@@ -197,7 +197,7 @@ function AppShell() {
         <span className="footer-sep" aria-hidden="true">·</span>
         <a className="footer-link" href={REPO_URL} target="_blank" rel="noreferrer">
           <svg width="14" height="14" aria-hidden="true">
-            <use href="/icons.svg#github-icon" />
+            <use href={`${import.meta.env.BASE_URL}icons.svg#github-icon`} />
           </svg>
           GitHub
         </a>
