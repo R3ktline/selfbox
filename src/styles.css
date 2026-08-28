@@ -1985,20 +1985,19 @@ button.quick-access-link {
   transition: opacity 0.2s var(--ease);
   pointer-events: none;
 }
-.category-card[data-group="Design"]::before { background: radial-gradient(circle at 100% 0%, color-mix(in srgb, var(--accent) 14%, transparent), transparent 70%); }
-.category-card[data-group="Image"]::before { background: radial-gradient(circle at 100% 0%, color-mix(in srgb, var(--accent-cyan) 14%, transparent), transparent 70%); }
-.category-card[data-group="PDF"]::before { background: radial-gradient(circle at 100% 0%, color-mix(in srgb, var(--warn) 14%, transparent), transparent 70%); }
-.category-card[data-group="Dev"]::before { background: radial-gradient(circle at 100% 0%, color-mix(in srgb, var(--info) 14%, transparent), transparent 70%); }
-.category-card[data-group="Media"]::before { background: radial-gradient(circle at 100% 0%, color-mix(in srgb, var(--success) 14%, transparent), transparent 70%); }
-.category-card[data-group="Most used"]::before { background: radial-gradient(circle at 100% 0%, color-mix(in srgb, var(--accent) 18%, transparent), transparent 70%); }
+.category-card[data-group="Design"]::before { background: radial-gradient(circle at var(--spot-x, 100%) var(--spot-y, 0%), color-mix(in srgb, var(--accent) 14%, transparent), transparent 70%); }
+.category-card[data-group="Image"]::before { background: radial-gradient(circle at var(--spot-x, 100%) var(--spot-y, 0%), color-mix(in srgb, var(--accent-cyan) 14%, transparent), transparent 70%); }
+.category-card[data-group="PDF"]::before { background: radial-gradient(circle at var(--spot-x, 100%) var(--spot-y, 0%), color-mix(in srgb, var(--warn) 14%, transparent), transparent 70%); }
+.category-card[data-group="Dev"]::before { background: radial-gradient(circle at var(--spot-x, 100%) var(--spot-y, 0%), color-mix(in srgb, var(--info) 14%, transparent), transparent 70%); }
+.category-card[data-group="Media"]::before { background: radial-gradient(circle at var(--spot-x, 100%) var(--spot-y, 0%), color-mix(in srgb, var(--success) 14%, transparent), transparent 70%); }
+.category-card[data-group="Most used"]::before { background: radial-gradient(circle at var(--spot-x, 100%) var(--spot-y, 0%), color-mix(in srgb, var(--accent) 18%, transparent), transparent 70%); }
 .category-card:hover {
   border-color: var(--border-strong);
   transform: translateY(-2px);
   box-shadow: var(--card-shadow-hover);
   z-index: 1;
 }
-.category-card:hover::before,
-.category-card.active::before { opacity: 1; }
+.category-card:hover::before { opacity: 1; }
 .category-card.active {
   border-color: var(--border-strong);
   box-shadow: var(--card-shadow-hover);
@@ -2151,16 +2150,17 @@ button.suggested-tool-card {
   width: 100%;
   text-align: left;
 }
-.tool-card[data-group="Design"]::before { background: radial-gradient(circle at 100% 0%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 55%); }
-.tool-card[data-group="Image"]::before { background: radial-gradient(circle at 100% 0%, color-mix(in srgb, var(--accent-cyan) 12%, transparent), transparent 55%); }
-.tool-card[data-group="PDF"]::before { background: radial-gradient(circle at 100% 0%, color-mix(in srgb, var(--warn) 12%, transparent), transparent 55%); }
-.tool-card[data-group="Dev"]::before { background: radial-gradient(circle at 100% 0%, color-mix(in srgb, var(--info) 12%, transparent), transparent 55%); }
-.tool-card[data-group="Media"]::before { background: radial-gradient(circle at 100% 0%, color-mix(in srgb, var(--success) 12%, transparent), transparent 55%); }
+.tool-card[data-group="Design"]::before { background: radial-gradient(circle at var(--spot-x, 100%) var(--spot-y, 0%), color-mix(in srgb, var(--accent) 12%, transparent), transparent 55%); }
+.tool-card[data-group="Image"]::before { background: radial-gradient(circle at var(--spot-x, 100%) var(--spot-y, 0%), color-mix(in srgb, var(--accent-cyan) 12%, transparent), transparent 55%); }
+.tool-card[data-group="PDF"]::before { background: radial-gradient(circle at var(--spot-x, 100%) var(--spot-y, 0%), color-mix(in srgb, var(--warn) 12%, transparent), transparent 55%); }
+.tool-card[data-group="Dev"]::before { background: radial-gradient(circle at var(--spot-x, 100%) var(--spot-y, 0%), color-mix(in srgb, var(--info) 12%, transparent), transparent 55%); }
+.tool-card[data-group="Media"]::before { background: radial-gradient(circle at var(--spot-x, 100%) var(--spot-y, 0%), color-mix(in srgb, var(--success) 12%, transparent), transparent 55%); }
 .tool-card::before {
   content: "";
   position: absolute;
   inset: 0;
   opacity: 0;
+  pointer-events: none;
   transition: opacity 0.25s var(--ease);
 }
 .tool-card:hover {

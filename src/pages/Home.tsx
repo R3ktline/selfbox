@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type DragEvent } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type DragEvent, type PointerEvent } from 'react'
 import { href } from '../lib/router'
 import {
   formatFileList,
@@ -18,6 +18,13 @@ import {
 } from '../lib/tools'
 import { GroupIcon, ToolIcon } from '../components/ToolIcons'
 
+function setCardSpotlight(e: PointerEvent<HTMLElement>) {
+  const el = e.currentTarget
+  const rect = el.getBoundingClientRect()
+  el.style.setProperty('--spot-x', `${((e.clientX - rect.left) / rect.width) * 100}%`)
+  el.style.setProperty('--spot-y', `${((e.clientY - rect.top) / rect.height) * 100}%`)
+}
+
 function ToolCard({ tool, files, onNavigate }: { tool: ToolMeta; files: File[]; onNavigate: (path: string) => void }) {
   const hasFiles = files.length > 0
 
@@ -28,6 +35,7 @@ function ToolCard({ tool, files, onNavigate }: { tool: ToolMeta; files: File[]; 
         className="tool-card"
         data-group={tool.group}
         onClick={() => onNavigate(tool.path)}
+        onPointerMove={setCardSpotlight}
       >
         <span className="tool-icon" data-group={tool.group}>
           <ToolIcon id={tool.icon} />
@@ -45,7 +53,7 @@ function ToolCard({ tool, files, onNavigate }: { tool: ToolMeta; files: File[]; 
   }
 
   return (
-    <a key={tool.path} className="tool-card" href={href(tool.path)} data-group={tool.group}>
+    <a key={tool.path} className="tool-card" href={href(tool.path)} data-group={tool.group} onPointerMove={setCardSpotlight}>
       <span className="tool-icon" data-group={tool.group}>
         <ToolIcon id={tool.icon} />
       </span>
@@ -506,6 +514,7 @@ export default function Home() {
                 className={'category-card' + (group === g ? ' active' : '')}
                 data-group={g}
                 onClick={() => onCategoryClick(g)}
+                onPointerMove={setCardSpotlight}
                 aria-pressed={group === g}
               >
                 <span className="category-card-icon">
