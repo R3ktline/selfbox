@@ -6,15 +6,18 @@ interface Props {
   onChange: (next: Content) => void
 }
 
-const TYPES: { value: ContentType; label: string }[] = [
+const PRIMARY_TYPES: { value: ContentType; label: string }[] = [
   { value: 'url', label: 'URL' },
-  { value: 'text', label: 'Text' },
   { value: 'wifi', label: 'WiFi' },
-  { value: 'vcard', label: 'vCard' },
+]
+
+const MORE_TYPES: { value: ContentType; label: string }[] = [
+  { value: 'text', label: 'Text' },
   { value: 'email', label: 'Email' },
   { value: 'tel', label: 'Phone' },
   { value: 'sms', label: 'SMS' },
-  { value: 'geo', label: 'Geo' },
+  { value: 'vcard', label: 'vCard' },
+  { value: 'geo', label: 'Location' },
 ]
 
 export default function ContentForm({ content, onChange }: Props) {
@@ -25,15 +28,8 @@ export default function ContentForm({ content, onChange }: Props) {
 
   return (
     <div className="panel panel-content">
-      <div className="panel-header">
-        <div>
-          <span className="panel-eyebrow">Step 1</span>
-          <h2>What should your QR code contain?</h2>
-          <p className="panel-hint">Pick a type and fill in the details — the preview updates as you type.</p>
-        </div>
-      </div>
-      <div className="content-tabs">
-        {TYPES.map((t) => (
+      <div className="content-tabs content-tabs-primary">
+        {PRIMARY_TYPES.map((t) => (
           <button
             key={t.value}
             type="button"
@@ -46,6 +42,21 @@ export default function ContentForm({ content, onChange }: Props) {
         ))}
       </div>
       <div className="form-grid form-grid-content">{renderFields(content, onChange)}</div>
+      <p className="content-more-types">
+        Also:{' '}
+        {MORE_TYPES.map((t, i) => (
+          <span key={t.value}>
+            {i > 0 && ' · '}
+            <button
+              type="button"
+              className={'content-more-link' + (content.type === t.value ? ' active' : '')}
+              onClick={() => setType(t.value)}
+            >
+              {t.label}
+            </button>
+          </span>
+        ))}
+      </p>
     </div>
   )
 }

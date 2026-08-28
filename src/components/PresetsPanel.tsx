@@ -1,8 +1,6 @@
 import { useState } from 'react'
 import type { HistoryEntry, LogoOptions, Preset, StyleOptions } from '../types'
 import { loadHistory, loadPresets, newId, saveHistory, savePresets } from '../lib/storage'
-import CollapsiblePanel from './CollapsiblePanel'
-
 interface Props {
   style: StyleOptions
   logo: LogoOptions
@@ -39,7 +37,8 @@ export default function PresetsPanel({ style, logo, onLoadPreset, onLoadHistory 
   }
 
   return (
-    <CollapsiblePanel eyebrow="Library" title="Presets & history" hint="Save your style or revisit past codes." defaultOpen={false}>
+    <div className="extras-block">
+      <h3 className="extras-heading">Presets & history</h3>
       <div className="tabs">
         <button
           type="button"
@@ -120,7 +119,7 @@ export default function PresetsPanel({ style, logo, onLoadPreset, onLoadHistory 
           </ul>
         </>
       )}
-    </CollapsiblePanel>
+    </div>
   )
 }
 

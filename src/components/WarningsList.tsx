@@ -30,16 +30,7 @@ const ICONS: Record<Warning['level'], ReactElement> = {
 }
 
 export default function WarningsList({ warnings }: Props) {
-  if (warnings.length === 0) {
-    return (
-      <div className="warnings empty">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-          <polyline points="20 6 9 17 4 12" />
-        </svg>
-        <span>Looks good — the code should scan reliably.</span>
-      </div>
-    )
-  }
+  if (warnings.length === 0) return null
   return (
     <div className="warnings-stack">
       {warnings.map((w, i) => (

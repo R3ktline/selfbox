@@ -12,9 +12,9 @@ const DOT_STYLES: DotStyle[] = ['square', 'rounded', 'dots', 'classy', 'classy-r
 const CORNER_STYLES: CornerStyle[] = ['square', 'dot', 'extra-rounded']
 const EC_LEVELS: { value: ErrorCorrectionLevel; label: string; desc: string }[] = [
   { value: 'L', label: 'L — Low (7%)', desc: 'Smallest code, recovers ~7% damage. Use when space is tight and the code will stay clean.' },
-  { value: 'M', label: 'M — Medium (15%)', desc: 'Default balance. Recovers ~15% damage.' },
+  { value: 'M', label: 'M — Medium (15%)', desc: 'Recovers ~15% damage. Good general-purpose balance.' },
   { value: 'Q', label: 'Q — Quartile (25%)', desc: 'Recovers ~25% damage. Good for codes with small logos.' },
-  { value: 'H', label: 'H — High (30%)', desc: 'Recovers ~30% damage. Recommended when a logo is centered in the code.' },
+  { value: 'H', label: 'H — High (30%)', desc: 'Recovers ~30% damage. Recommended when using a centered logo.' },
 ]
 
 export default function StylePanel({ style, onChange }: Props) {
@@ -23,9 +23,9 @@ export default function StylePanel({ style, onChange }: Props) {
   const [advancedOpen, setAdvancedOpen] = useState(false)
 
   return (
-    <CollapsiblePanel eyebrow="Step 2" title="Style" hint="Colors and shape. Click to expand for advanced options." defaultOpen={false}>
+    <CollapsiblePanel title="Style" hint="Colors and shape." defaultOpen={false}>
       <div className="form-grid">
-        <label className="field">
+        <label className="field span-2">
           <span>Foreground</span>
           <div className="color-row">
             <ColorPicker value={style.fgColor} onChange={(c) => upd({ fgColor: c })} ariaLabel="Foreground color" />
@@ -33,10 +33,11 @@ export default function StylePanel({ style, onChange }: Props) {
               type="text"
               value={style.fgColor}
               onChange={(e) => upd({ fgColor: e.target.value })}
+              style={{ fontFamily: 'var(--font-mono)' }}
             />
           </div>
         </label>
-        <label className="field">
+        <label className="field span-2">
           <span>Background</span>
           <div className="color-row">
             <ColorPicker value={style.bgColor} onChange={(c) => upd({ bgColor: c })} ariaLabel="Background color" />
@@ -44,6 +45,7 @@ export default function StylePanel({ style, onChange }: Props) {
               type="text"
               value={style.bgColor}
               onChange={(e) => upd({ bgColor: e.target.value })}
+              style={{ fontFamily: 'var(--font-mono)' }}
             />
           </div>
         </label>
@@ -74,7 +76,7 @@ export default function StylePanel({ style, onChange }: Props) {
             </label>
             {style.useGradient && (
               <>
-                <label className="field">
+                <label className="field span-2">
                   <span>Secondary color</span>
                   <div className="color-row">
                     <ColorPicker value={style.gradientColor} onChange={(c) => upd({ gradientColor: c })} ariaLabel="Gradient secondary color" />
@@ -82,6 +84,7 @@ export default function StylePanel({ style, onChange }: Props) {
                       type="text"
                       value={style.gradientColor}
                       onChange={(e) => upd({ gradientColor: e.target.value })}
+                      style={{ fontFamily: 'var(--font-mono)' }}
                     />
                   </div>
                 </label>
@@ -167,7 +170,7 @@ export default function StylePanel({ style, onChange }: Props) {
               <input
                 type="range"
                 min={256}
-                max={2048}
+                max={4096}
                 step={64}
                 value={style.downloadSize}
                 onChange={(e) => upd({ downloadSize: Number(e.target.value) })}

@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 
 interface Props {
   value: string
@@ -144,6 +145,61 @@ export default function ColorPicker({ value, onChange, ariaLabel }: Props) {
     if (e.key === 'Enter') (e.currentTarget as HTMLInputElement).blur()
   }
 
+  const popover = open ? (
+    <div
+      className="cp-popover"
+      ref={popoverRef}
+      role="dialog"
+      aria-label="Color picker"
+      style={{ left: placement.left, top: placement.top }}
+    >
+      <div className="cp-section-label">Black &amp; white</div>
+      <div className="cp-row">
+        {GRAYSCALE.map((c) => (
+          <button
+            key={c}
+            type="button"
+            className={'cp-tile' + (c.toLowerCase() === value.toLowerCase() ? ' active' : '')}
+            style={{ background: c }}
+            onClick={() => onSwatch(c)}
+            title={c}
+            aria-label={c}
+          />
+        ))}
+      </div>
+      <div className="cp-section-label">Color palette</div>
+      <div className="cp-grid">
+        {PRESETS.map((c) => (
+          <button
+            key={c}
+            type="button"
+            className={'cp-tile' + (c.toLowerCase() === value.toLowerCase() ? ' active' : '')}
+            style={{ background: c }}
+            onClick={() => onSwatch(c)}
+            title={c}
+            aria-label={c}
+          />
+        ))}
+      </div>
+      <div className="cp-hex-row">
+        <span className="cp-hash">#</span>
+        <input
+          className="cp-hex"
+          value={hexInput.replace(/^#/, '')}
+          onChange={onHexChange}
+          onBlur={commitHex}
+          onKeyDown={onHexKey}
+          maxLength={6}
+          spellCheck={false}
+          aria-label="Hex color value"
+        />
+        <button type="button" className="cp-apply" onClick={commitHex}>
+          Apply
+        </button>
+      </div>
+    </div>
+  ) : null
+
   return (
     <div className="cp" ref={rootRef}>
       <button
@@ -154,60 +210,7 @@ export default function ColorPicker({ value, onChange, ariaLabel }: Props) {
         aria-label={ariaLabel || 'Open color picker'}
         title={value}
       />
-      {open && (
-        <div
-          className="cp-popover"
-          ref={popoverRef}
-          role="dialog"
-          aria-label="Color picker"
-          style={{ left: placement.left, top: placement.top }}
-        >
-          <div className="cp-section-label">Black &amp; white</div>
-          <div className="cp-row">
-            {GRAYSCALE.map((c) => (
-              <button
-                key={c}
-                type="button"
-                className={'cp-tile' + (c.toLowerCase() === value.toLowerCase() ? ' active' : '')}
-                style={{ background: c }}
-                onClick={() => onSwatch(c)}
-                title={c}
-                aria-label={c}
-              />
-            ))}
-          </div>
-          <div className="cp-section-label">Color palette</div>
-          <div className="cp-grid">
-            {PRESETS.map((c) => (
-              <button
-                key={c}
-                type="button"
-                className={'cp-tile' + (c.toLowerCase() === value.toLowerCase() ? ' active' : '')}
-                style={{ background: c }}
-                onClick={() => onSwatch(c)}
-                title={c}
-                aria-label={c}
-              />
-            ))}
-          </div>
-          <div className="cp-hex-row">
-            <span className="cp-hash">#</span>
-            <input
-              className="cp-hex"
-              value={hexInput.replace(/^#/, '')}
-              onChange={onHexChange}
-              onBlur={commitHex}
-              onKeyDown={onHexKey}
-              maxLength={6}
-              spellCheck={false}
-              aria-label="Hex color value"
-            />
-            <button type="button" className="cp-apply" onClick={commitHex}>
-              Apply
-            </button>
-          </div>
-        </div>
-      )}
+      {popover && createPortal(popover, document.body)}
     </div>
   )
 }

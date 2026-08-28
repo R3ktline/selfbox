@@ -47,16 +47,15 @@ export default function BatchPanel({ style, logo }: Props) {
   }
 
   return (
-    <div className="panel">
-      <h2>Batch generation</h2>
+    <div className="extras-block">
+      <h3 className="extras-heading">Batch generation</h3>
       <p className="hint">
-        Paste one payload per line. URLs (http/https), mailto:, tel:, sms:, geo:, WIFI: lines, or
-        vCards (a single line starting with BEGIN:VCARD will absorb until END:VCARD). Plain text
-        lines become plain text QR codes. Names can be set by prefixing <code>name | payload</code>.
+        One payload per line — URLs, WiFi strings, mailto, tel, or plain text. Prefix with{' '}
+        <code>name | payload</code> to name files.
       </p>
       <textarea
         className="batch-input"
-        rows={10}
+        rows={6}
         value={input}
         onChange={(e) => setInput(e.target.value)}
       />

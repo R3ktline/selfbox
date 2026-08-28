@@ -76,22 +76,12 @@ export function validateStyle(style: StyleOptions, logo: LogoOptions, payload: s
   if (logo.dataUrl) {
     const headroom = EC_HEADROOM[style.errorCorrectionLevel]
     const coverage = logo.size / 100
-    if (coverage > headroom * 0.7) {
-      warnings.push({
-        level: 'warn',
-        message: `Logo covers ~${(coverage * 100).toFixed(0)}% of the code, which approaches the ${style.errorCorrectionLevel} error-correction budget (~${Math.round(headroom * 100)}%). Consider a higher EC level or a smaller logo.`,
-      })
-    }
     if (coverage > headroom && !logo.hideBackgroundDots) {
       warnings.push({
         level: 'warn',
         message: 'Logo is larger than the error-correction budget. Enable "hide dots behind logo" or lower the logo size to keep the code scannable.',
       })
     }
-  }
-
-  if (style.errorCorrectionLevel === 'L' && payload.length > 100) {
-    warnings.push({ level: 'info', message: 'Level L recovers only ~7% damage. Consider M/Q/H for production codes.' })
   }
 
   return warnings

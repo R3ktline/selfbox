@@ -1,5 +1,4 @@
 import type { LogoOptions } from '../types'
-import CollapsiblePanel from './CollapsiblePanel'
 
 interface Props {
   logo: LogoOptions
@@ -21,7 +20,9 @@ export default function LogoUploader({ logo, onChange }: Props) {
   }
 
   return (
-    <CollapsiblePanel eyebrow="Step 3" title="Logo" hint="Add a brand mark to the center of the code." defaultOpen={false}>
+    <div className="panel panel-logo">
+      <h2 className="panel-inline-title">Logo</h2>
+      <p className="panel-hint">Optional center image.</p>
       <div className="logo-row">
         <label className="upload-btn">
           <input type="file" accept="image/*" onChange={onFile} hidden />
@@ -90,7 +91,9 @@ export default function LogoUploader({ logo, onChange }: Props) {
           </div>
         </>
       )}
-      {!logo.dataUrl && <p className="hint">No logo — the center area is fully scannable. Logos should only be placed in the center, never over the three corner finder patterns.</p>}
-    </CollapsiblePanel>
+      {!logo.dataUrl && (
+        <p className="hint">No logo — the center area is fully scannable.</p>
+      )}
+    </div>
   )
 }

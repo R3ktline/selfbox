@@ -8,6 +8,7 @@ import DownloadBar from '../components/DownloadBar'
 import WarningsList from '../components/WarningsList'
 import PresetsPanel from '../components/PresetsPanel'
 import BatchPanel from '../components/BatchPanel'
+import CollapsiblePanel from '../components/CollapsiblePanel'
 import { buildPayload } from '../lib/content'
 import { validateStyle } from '../lib/validation'
 
@@ -21,7 +22,7 @@ export default function QrTool() {
     dotStyle: 'square',
     cornerSquareStyle: 'square',
     cornerDotStyle: 'square',
-    errorCorrectionLevel: 'M',
+    errorCorrectionLevel: 'H',
     margin: 4,
     width: 320,
     downloadSize: 4096,
@@ -54,17 +55,19 @@ export default function QrTool() {
     <main className="layout" id="main">
       <section className="col left">
         <ContentForm content={content} onChange={setContent} />
-        <div className="secondary-panels">
-          <StylePanel style={style} onChange={setStyle} />
-          <LogoUploader logo={logo} onChange={setLogo} />
-        </div>
-        <PresetsPanel
-          style={style}
-          logo={logo}
-          onLoadPreset={onLoadPreset}
-          onLoadHistory={onLoadHistory}
-        />
-        <BatchPanel style={style} logo={logo} />
+        <LogoUploader logo={logo} onChange={setLogo} />
+        <StylePanel style={style} onChange={setStyle} />
+        <CollapsiblePanel title="Batch & presets" hint="Generate many codes or save styles." defaultOpen={false}>
+          <div className="extras-sections">
+            <PresetsPanel
+              style={style}
+              logo={logo}
+              onLoadPreset={onLoadPreset}
+              onLoadHistory={onLoadHistory}
+            />
+            <BatchPanel style={style} logo={logo} />
+          </div>
+        </CollapsiblePanel>
       </section>
       <section className="col right">
         <WarningsList warnings={warnings} />

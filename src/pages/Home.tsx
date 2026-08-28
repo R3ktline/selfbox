@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type DragEvent, type RefObject } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type DragEvent } from 'react'
 import { href } from '../lib/router'
 import {
   formatFileList,
@@ -118,50 +118,76 @@ function QuickAccessLink({
 }
 
 const BELOW_FOLD_REVEAL_MS = 480
-const CATEGORY_SCROLL_OFFSET = 24
+const BELOW_FOLD_SESSION_KEY = 'home-below-fold-revealed'
+const HOME_GROUP_KEY = 'home-group-filter'
+const HOME_QUERY_KEY = 'home-search-query'
 
-function getScrollTopFor(el: Element): number {
-  return Math.max(0, el.getBoundingClientRect().top + window.scrollY - CATEGORY_SCROLL_OFFSET)
-}
+const HOME_FILTERS: HomeFilter[] = ['All', ...GROUP_ORDER]
 
-function isNearAnchor(el: Element, threshold = 48): boolean {
-  return Math.abs(el.getBoundingClientRect().top - CATEGORY_SCROLL_OFFSET) <= threshold
-}
-
-function scrollToAnchor(el: Element, behavior: ScrollBehavior = 'smooth'): Promise<void> {
-  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  const resolved = reducedMotion ? 'auto' : behavior
-  const top = getScrollTopFor(el)
-
-  if (resolved === 'auto') {
-    window.scrollTo({ top, left: 0, behavior: 'auto' })
-    return Promise.resolve()
+function hasRevealedBelowThisSession(): boolean {
+  try {
+    return sessionStorage.getItem(BELOW_FOLD_SESSION_KEY) === '1'
+  } catch {
+    return false
   }
-
-  return new Promise((resolve) => {
-    let done = false
-    const finish = () => {
-      if (done) return
-      done = true
-      window.removeEventListener('scrollend', onScrollEnd)
-      window.clearTimeout(fallback)
-      resolve()
-    }
-    const onScrollEnd = () => finish()
-    const fallback = window.setTimeout(finish, 500)
-    window.addEventListener('scrollend', onScrollEnd, { once: true })
-    window.scrollTo({ top, left: 0, behavior: 'smooth' })
-  })
 }
 
-function scheduleScrollToAnchor(anchorRef: RefObject<HTMLElement | null>, waitForReveal: boolean) {
+function markBelowRevealedThisSession() {
+  try {
+    sessionStorage.setItem(BELOW_FOLD_SESSION_KEY, '1')
+  } catch {
+    /* ignore */
+  }
+}
+
+function loadHomeGroup(): HomeFilter {
+  try {
+    const value = sessionStorage.getItem(HOME_GROUP_KEY)
+    if (value && HOME_FILTERS.includes(value as HomeFilter)) return value as HomeFilter
+  } catch {
+    /* ignore */
+  }
+  return 'All'
+}
+
+function saveHomeGroup(group: HomeFilter) {
+  try {
+    sessionStorage.setItem(HOME_GROUP_KEY, group)
+  } catch {
+    /* ignore */
+  }
+}
+
+function loadHomeQuery(): string {
+  try {
+    return sessionStorage.getItem(HOME_QUERY_KEY) ?? ''
+  } catch {
+    return ''
+  }
+}
+
+function saveHomeQuery(query: string) {
+  try {
+    const trimmed = query.trim()
+    if (trimmed) sessionStorage.setItem(HOME_QUERY_KEY, trimmed)
+    else sessionStorage.removeItem(HOME_QUERY_KEY)
+  } catch {
+    /* ignore */
+  }
+}
+
+function scrollToGroupSection(groupId: ToolGroup) {
+  const el = document.querySelector(`[data-group-section="${groupId}"]`)
+  if (!el) return
+
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  el.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth', block: 'start' })
+}
+
+function scheduleScrollToGroup(groupId: ToolGroup, waitForReveal: boolean) {
   const runScroll = () => {
-    const el = anchorRef.current
-    if (!el) return
     requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        void scrollToAnchor(el, 'smooth')
-      })
+      requestAnimationFrame(() => scrollToGroupSection(groupId))
     })
   }
 
@@ -174,18 +200,39 @@ function scheduleScrollToAnchor(anchorRef: RefObject<HTMLElement | null>, waitFo
 }
 
 export default function Home() {
-  const [query, setQuery] = useState('')
-  const [group, setGroup] = useState<HomeFilter>('All')
+  const [query, setQuery] = useState(() => loadHomeQuery())
+  const [group, setGroup] = useState<HomeFilter>(() => loadHomeGroup())
   const mostUsed = useMemo(() => mostUsedTools(), [])
   const [files, setFiles] = useState<File[]>([])
   const [dragOver, setDragOver] = useState(false)
-  const [belowRevealed, setBelowRevealed] = useState(false)
-  const [hintPhase, setHintPhase] = useState<'visible' | 'hiding' | 'gone'>('visible')
+  const [belowRevealed, setBelowRevealed] = useState(() => hasRevealedBelowThisSession())
+  const [instantBelow, setInstantBelow] = useState(() => hasRevealedBelowThisSession())
+  const [hintPhase, setHintPhase] = useState<'visible' | 'hiding' | 'gone'>(() =>
+    hasRevealedBelowThisSession() ? 'gone' : 'visible',
+  )
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const categoryShowcaseRef = useRef<HTMLElement>(null)
+  const pendingScrollRef = useRef<ToolGroup | null>(null)
+  const pendingRevealRef = useRef(false)
+  const restoredScrollRef = useRef(false)
 
   const suggestions = useMemo(() => suggestToolsForFiles(files), [files])
   const browsingAll = group === 'All' && !query.trim()
+
+  useEffect(() => {
+    saveHomeGroup(group)
+  }, [group])
+
+  useEffect(() => {
+    saveHomeQuery(query)
+  }, [query])
+
+  useEffect(() => {
+    if (restoredScrollRef.current) return
+    restoredScrollRef.current = true
+    if (group !== 'All' && !query.trim()) {
+      scheduleScrollToGroup(group, false)
+    }
+  }, [group, query])
 
   const items = useMemo(() => {
     const found = searchTools(query)
@@ -202,7 +249,16 @@ export default function Home() {
 
   useEffect(() => {
     if (!browsingAll) {
+      markBelowRevealedThisSession()
       setBelowRevealed(true)
+      setInstantBelow(true)
+      setHintPhase('gone')
+      return
+    }
+
+    if (hasRevealedBelowThisSession()) {
+      setBelowRevealed(true)
+      setInstantBelow(true)
       setHintPhase('gone')
       return
     }
@@ -213,10 +269,12 @@ export default function Home() {
 
   const revealBelow = useCallback(() => {
     if (belowRevealed || hintPhase === 'hiding') return
+    markBelowRevealedThisSession()
     setHintPhase('hiding')
     window.setTimeout(() => {
       setHintPhase('gone')
       setBelowRevealed(true)
+      setInstantBelow(true)
     }, 180)
   }, [belowRevealed, hintPhase])
 
@@ -257,35 +315,27 @@ export default function Home() {
     (g: ToolGroup) => {
       const next = group === g ? 'All' : g
       const needsReveal = browsingAll && !belowRevealed
-      const switchingFilter = group !== 'All' && next !== 'All'
-      const anchor = categoryShowcaseRef.current
 
-      if (next === 'All') {
-        setGroup('All')
-        return
+      if (next !== 'All') {
+        if (needsReveal) revealBelow()
+        pendingScrollRef.current = g
+        pendingRevealRef.current = needsReveal
       }
 
-      const applyFilter = () => {
-        setGroup(next)
-        if (!switchingFilter) {
-          scheduleScrollToAnchor(categoryShowcaseRef, needsReveal)
-        }
-      }
-
-      if (switchingFilter && anchor) {
-        if (isNearAnchor(anchor)) {
-          applyFilter()
-          return
-        }
-        void scrollToAnchor(anchor, 'smooth').then(applyFilter)
-        return
-      }
-
-      if (needsReveal) revealBelow()
-      applyFilter()
+      setGroup(next)
     },
     [group, browsingAll, belowRevealed, revealBelow],
   )
+
+  useEffect(() => {
+    const target = pendingScrollRef.current
+    if (!target) return
+
+    pendingScrollRef.current = null
+    const waitForReveal = pendingRevealRef.current
+    pendingRevealRef.current = false
+    scheduleScrollToGroup(target, waitForReveal)
+  }, [group, belowRevealed])
 
   const addFiles = useCallback((list: FileList | null) => {
     if (!list || list.length === 0) return
@@ -440,12 +490,12 @@ export default function Home() {
           className={
             'home-below-fold' +
             (belowVisible ? ' is-visible' : '') +
-            (!browsingAll ? ' is-instant' : '')
+            (instantBelow || !browsingAll ? ' is-instant' : '')
           }
         >
           <div className="home-below-fold-inner">
             <div className="home-below-fold-content">
-        <section ref={categoryShowcaseRef} className="category-showcase" aria-label="Tool categories">
+        <section className="category-showcase" aria-label="Tool categories">
           {GROUP_ORDER.map((g) => {
             const meta = GROUP_META[g]
             const count = TOOLS.filter((t) => t.group === g).length
