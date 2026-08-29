@@ -800,7 +800,7 @@ export function PdfToolView({ variant, title, hint, eyebrow = 'PDF' }: PdfToolVi
         {variant === 'images' ? (
           <>
             <div className="pdf-export-bar">
-              <Dropzone accept="image/*" multiple className="dropzone-inline" label="+ Add images" onFiles={onPickImages} />
+              <Dropzone accept="image/*" multiple className="dropzone-inline" label="+ Add images (drop or paste)" onFiles={onPickImages} />
               <button
                 type="button"
                 className="btn primary"
@@ -854,7 +854,7 @@ export function PdfToolView({ variant, title, hint, eyebrow = 'PDF' }: PdfToolVi
                 accept="application/pdf"
                 multiple
                 className="dropzone-inline"
-                label="+ Add PDF"
+                label="+ Add PDF (drop or paste)"
                 onFiles={onPickFiles}
               />
               {docs.map((d) => (

@@ -13,6 +13,7 @@ import {
   type MarkdownRenderOptions,
   type MdTheme,
 } from '../lib/markdown-render'
+import { useClipboardPaste } from '../lib/useClipboardPaste'
 import { usePendingFiles } from '../lib/usePendingFiles'
 
 const SAMPLE = `# Hello, Markdown
@@ -151,6 +152,14 @@ export default function MarkdownExport() {
   }
 
   usePendingFiles('/markdown', (pending) => { if (pending[0]) void onImport(pending[0]) })
+
+  useClipboardPaste(
+    (files) => {
+      const f = files[0]
+      if (f) void onImport(f)
+    },
+    { accept: '.md,.markdown,.txt', multiple: false },
+  )
 
   return (
     <ToolPage

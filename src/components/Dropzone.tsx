@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type DragEvent, type ReactNode } from 'react'
+import { useClipboardPaste } from '../lib/useClipboardPaste'
 
 interface Props {
   accept?: string
@@ -6,11 +7,22 @@ interface Props {
   label: string
   hint?: string
   className?: string
+  /** Listen for Ctrl/⌘+V file paste. Default true. */
+  paste?: boolean
   onFiles: (files: FileList) => void
   children?: ReactNode
 }
 
-export default function Dropzone({ accept, multiple, label, hint, className, onFiles, children }: Props) {
+export default function Dropzone({
+  accept,
+  multiple,
+  label,
+  hint,
+  className,
+  paste = true,
+  onFiles,
+  children,
+}: Props) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [over, setOver] = useState(false)
 
@@ -25,6 +37,8 @@ export default function Dropzone({ accept, multiple, label, hint, className, onF
       window.removeEventListener('drop', onDrag)
     }
   }, [])
+
+  useClipboardPaste(onFiles, { accept, enabled: paste, multiple: Boolean(multiple) })
 
   const onDrop = (e: DragEvent) => {
     e.preventDefault()

@@ -23,7 +23,7 @@
 
 <br />
 
-**[Quick Start](#-quick-start) · [Features](#-what-you-get) · [Preview](#-see-it-in-action) · [All Tools](#-all-tools) · [Deploy](#-run-in-production) · [Privacy](#-privacy)**
+**[Quick Start](#quick-start) · [Features](#what-you-get) · [Preview](#see-it-in-action) · [All Tools](#all-tools) · [Deploy](#run-in-production) · [Privacy](#privacy)**
 
 </div>
 

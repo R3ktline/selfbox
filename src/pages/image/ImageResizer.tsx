@@ -9,6 +9,7 @@ import {
   formatBytes,
   revokePreviewUrl,
 } from '../../lib/images'
+import { useClipboardPaste } from '../../lib/useClipboardPaste'
 import { usePendingFiles } from '../../lib/usePendingFiles'
 
 type FitMode = 'fit' | 'fill' | 'stretch'
@@ -50,6 +51,14 @@ export default function ImageResizer() {
   }
 
   usePendingFiles('/image/resize', (pending) => { if (pending[0]) void onPick(pending[0]) })
+
+  useClipboardPaste(
+    (files) => {
+      const f = files[0]
+      if (f) void onPick(f)
+    },
+    { accept: 'image/*', enabled: Boolean(preview), multiple: false },
+  )
 
   const onWidthChange = (w: number) => {
     setWidth(w)
@@ -150,7 +159,7 @@ export default function ImageResizer() {
         <div className="panel">
           <h2>Source</h2>
           {!preview ? (
-            <Dropzone accept="image/*" label="Choose or drop an image" onFiles={(files: FileList) => { const f = files[0]; if (f) onPick(f) }} />
+            <Dropzone accept="image/*" label="Drop, choose, or paste an image" hint="Ctrl/⌘+V to paste" onFiles={(files: FileList) => { const f = files[0]; if (f) onPick(f) }} />
           ) : (
             <>
               <div className="file-info">

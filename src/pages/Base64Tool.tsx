@@ -58,30 +58,6 @@ export default function Base64Tool() {
     }
   }, [input, sub, auto, direction, wrapLines])
 
-  useEffect(() => {
-    if (sub !== 'image') return
-    const onPaste = async (e: ClipboardEvent) => {
-      const items = e.clipboardData?.items
-      if (!items) return
-      for (let i = 0; i < items.length; i++) {
-        const item = items[i]
-        if (item.type.startsWith('image/')) {
-          const file = item.getAsFile()
-          if (file) {
-            const dataUrl = await readFileAsDataUrl(file)
-            setInput(dataUrl.split(',')[1] ?? dataUrl)
-            setOutput(dataUrl)
-            setInfo(`Pasted: ${file.type} (${file.size} bytes)`)
-            e.preventDefault()
-            return
-          }
-        }
-      }
-    }
-    window.addEventListener('paste', onPaste)
-    return () => window.removeEventListener('paste', onPaste)
-  }, [sub])
-
   const run = (op: 'encode' | 'decode') => {
     setError(null)
     setInfo(null)
@@ -210,7 +186,7 @@ export default function Base64Tool() {
               )}
             </>
           ) : sub === 'file' ? (
-            <Dropzone label="Drop or choose any file to encode" onFiles={(files) => { const f = files[0]; if (f) onAnyFile(f) }} />
+            <Dropzone label="Drop, choose, or paste any file to encode" onFiles={(files) => { const f = files[0]; if (f) onAnyFile(f) }} />
           ) : (
             <textarea
               value={input}

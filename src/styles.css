@@ -229,7 +229,6 @@ button { font-family: inherit; }
 .context-bar {
   display: flex;
   align-items: center;
-  gap: 12px;
   padding: 0 24px;
   min-height: 42px;
   background: color-mix(in srgb, var(--bg-2) 90%, transparent);
@@ -238,30 +237,6 @@ button { font-family: inherit; }
   top: 57px;
   z-index: 25;
 }
-.context-bar-label {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-family: var(--font-mono);
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-  flex-shrink: 0;
-  padding-right: 4px;
-}
-.context-bar-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 999px;
-  background: var(--accent);
-}
-.context-bar-label[data-group="Design"] .context-bar-dot { background: var(--accent); }
-.context-bar-label[data-group="Image"] .context-bar-dot { background: var(--accent-cyan); }
-.context-bar-label[data-group="PDF"] .context-bar-dot { background: var(--warn); }
-.context-bar-label[data-group="Dev"] .context-bar-dot { background: var(--info); }
-.context-bar-label[data-group="Media"] .context-bar-dot { background: var(--success); }
 .context-bar-scroll {
   flex: 1;
   min-width: 0;
@@ -1513,6 +1488,17 @@ input[type="checkbox"] {
   flex: 1;
   padding: 4px;
   margin: -4px;
+}
+.quick-access-panel.is-searching .quick-access-grid {
+  grid-template-rows: none;
+  grid-auto-rows: minmax(72px, auto);
+  max-height: min(42vh, 360px);
+  overflow-y: auto;
+  align-content: start;
+}
+.quick-access-panel.is-searching:has(.quick-access-grid:empty) .quick-access-grid,
+.quick-access-panel.is-searching .quick-access-grid:empty {
+  display: none;
 }
 .quick-access-link {
   display: flex;
@@ -3626,7 +3612,6 @@ button.suggested-tool-card {
     padding: 0 16px;
     top: 53px;
   }
-  .context-bar-label { display: none; }
 }
 
 /* Media downloader */

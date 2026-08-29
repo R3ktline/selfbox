@@ -76,7 +76,7 @@ export default function HashUuidTool() {
                 <span>Text input</span>
                 <textarea value={text} onChange={(e) => setText(e.target.value)} style={{ minHeight: 120, fontFamily: 'var(--font-mono)' }} />
               </label>
-              <Dropzone label="Or hash a file" onFiles={(files) => { const f = files[0]; if (f) onFile(f) }} />
+              <Dropzone label="Drop, choose, or paste a file to hash" onFiles={(files) => { const f = files[0]; if (f) onFile(f) }} />
             </>
           ) : (
             <div className="form-grid">

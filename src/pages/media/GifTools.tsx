@@ -235,7 +235,7 @@ export default function GifTools() {
       <section className="col left">
         <div className="panel">
           <h2>Open GIF</h2>
-          <Dropzone accept="image/gif" label="Choose or drop a GIF" onFiles={onPickGif} />
+          <Dropzone accept="image/gif" label="Drop, choose, or paste a GIF" hint="Ctrl/⌘+V to paste" onFiles={onPickGif} />
           {gifInfo && (
             <>
               <ul className="meta-list" style={{ marginTop: 12 }}>
@@ -259,7 +259,7 @@ export default function GifTools() {
         <div className="panel">
           <h2>Create GIF</h2>
           <p className="hint">Add images in order — each becomes one frame.</p>
-          <Dropzone accept="image/*" multiple label="Add images" onFiles={onPickImages} />
+          <Dropzone accept="image/*" multiple label="Drop, choose, or paste images" hint="Each image becomes one frame" onFiles={onPickImages} />
           {imageFiles.length > 0 && (
             <ul className="file-list">
               {imageFiles.map((f, i) => (

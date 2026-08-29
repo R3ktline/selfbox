@@ -6,6 +6,7 @@ import { downloadBlob, formatBytes } from '../../lib/images'
 import { mapPool } from '../../lib/async'
 import { useToast } from '../../lib/toast'
 import { toFileList } from '../../lib/fileStore'
+import { useClipboardPaste } from '../../lib/useClipboardPaste'
 import { usePendingFiles } from '../../lib/usePendingFiles'
 
 interface Result {
@@ -40,6 +41,8 @@ export default function ImageCompressor() {
   }
 
   usePendingFiles('/image/compressor', (pending) => onPick(toFileList(pending)))
+
+  useClipboardPaste(onPick, { accept: 'image/*', enabled: files.length > 0, multiple: true })
 
   const compressAll = async () => {
     if (files.length === 0) return
@@ -99,8 +102,8 @@ export default function ImageCompressor() {
             <Dropzone
               accept="image/*"
               multiple
-              label="Drop images, or click to choose"
-              hint="JPEG, PNG, WebP, GIF — processed on this device"
+              label="Drop, choose, or paste images"
+              hint="JPEG, PNG, WebP, GIF — Ctrl/⌘+V to paste"
               onFiles={onPick}
             />
           ) : (

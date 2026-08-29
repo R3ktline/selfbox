@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import ToolPage from '../../components/ToolPage'
+import Dropzone from '../../components/Dropzone'
 import { createPreviewUrl, fileToImage, revokePreviewUrl } from '../../lib/images'
+import { useClipboardPaste } from '../../lib/useClipboardPaste'
 import { usePendingFiles } from '../../lib/usePendingFiles'
 
 interface Swatch {
@@ -63,7 +65,6 @@ export default function ImagePalette() {
   const [count, setCount] = useState(6)
   const [picked, setPicked] = useState<Swatch | null>(null)
   const [zoom, setZoom] = useState(1)
-  const [pasteHint, setPasteHint] = useState(false)
   const [hexInput, setHexInput] = useState('#4b6bff')
   const fileInput = useRef<HTMLInputElement>(null)
   const sourceImageRef = useRef<HTMLImageElement | null>(null)
@@ -84,34 +85,19 @@ export default function ImagePalette() {
 
   usePendingFiles('/image/palette', (pending) => { if (pending[0]) void onPick(pending[0]) })
 
+  useClipboardPaste(
+    (files) => {
+      const f = files[0]
+      if (f) void onPick(f)
+    },
+    { accept: 'image/*', enabled: Boolean(imageUrl), multiple: false },
+  )
+
   const onRecount = async () => {
     const img = sourceImageRef.current
     if (!img) return
     setPalette(quantize(img, count))
   }
-
-  // Paste from clipboard (anywhere on the page)
-  useEffect(() => {
-    const onPaste = (e: ClipboardEvent) => {
-      const items = e.clipboardData?.items
-      if (!items) return
-      for (let i = 0; i < items.length; i++) {
-        const item = items[i]
-        if (item.type.startsWith('image/')) {
-          const file = item.getAsFile()
-          if (file) {
-            onPick(file)
-            e.preventDefault()
-            setPasteHint(true)
-            window.setTimeout(() => setPasteHint(false), 2000)
-            return
-          }
-        }
-      }
-    }
-    window.addEventListener('paste', onPaste)
-    return () => window.removeEventListener('paste', onPaste)
-  }, [count])
 
   useEffect(() => () => revokePreviewUrl(imageUrl), [imageUrl])
 
@@ -185,23 +171,15 @@ export default function ImagePalette() {
             style={{ display: 'none' }}
           />
           {!imageUrl ? (
-            <div
-              className={'dropzone' + (pasteHint ? ' active' : '')}
-              onClick={() => fileInput.current?.click()}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') fileInput.current?.click()
+            <Dropzone
+              accept="image/*"
+              label="Choose an image, drop one, or paste from clipboard"
+              hint="Click, drag-and-drop, or press Ctrl/⌘+V anywhere on the page"
+              onFiles={(files) => {
+                const f = files[0]
+                if (f) void onPick(f)
               }}
-            >
-              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <rect x="3" y="3" width="18" height="18" rx="2" />
-                <circle cx="8.5" cy="8.5" r="1.5" />
-                <path d="M21 15l-5-5L5 21" />
-              </svg>
-              <strong>Choose an image, drop one, or paste from clipboard</strong>
-              <span className="meta">Click, drag-and-drop, or press Ctrl/⌘ + V anywhere on the page</span>
-            </div>
+            />
           ) : (
             <>
               <div className="file-info">

@@ -3,6 +3,7 @@ import ToolPage from '../components/ToolPage'
 import JsonTree from '../components/JsonTree'
 import { readFileAsText } from '../lib/images'
 import { useToast } from '../lib/toast'
+import { useClipboardPaste } from '../lib/useClipboardPaste'
 import { usePendingFiles } from '../lib/usePendingFiles'
 
 type Mode = 'json' | 'csv'
@@ -225,6 +226,14 @@ export default function JsonFormatter() {
   }
 
   usePendingFiles('/json', (pending) => { if (pending[0]) void onImport(pending[0]) })
+
+  useClipboardPaste(
+    (files) => {
+      const f = files[0]
+      if (f) void onImport(f)
+    },
+    { accept: '.json,.csv,.txt', multiple: false },
+  )
 
   const onKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Tab') {

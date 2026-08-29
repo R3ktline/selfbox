@@ -4,6 +4,8 @@ import ToolPage from '../components/ToolPage'
 import { downloadBlob, readFileAsText } from '../lib/images'
 import { exportDiffAsImage } from '../lib/diff-export'
 import { useToast } from '../lib/toast'
+import { useClipboardPaste } from '../lib/useClipboardPaste'
+import { usePendingFiles } from '../lib/usePendingFiles'
 
 type DiffMode = 'lines' | 'words'
 type Layout = 'unified' | 'split'
@@ -43,6 +45,8 @@ export default function TextDiff() {
   const [exportBusy, setExportBusy] = useState(false)
   const fileA = useRef<HTMLInputElement>(null)
   const fileB = useRef<HTMLInputElement>(null)
+  const textA = useRef<HTMLTextAreaElement>(null)
+  const textB = useRef<HTMLTextAreaElement>(null)
   const diffRef = useRef<HTMLDivElement>(null)
   const { push } = useToast()
 
@@ -58,6 +62,18 @@ export default function TextDiff() {
     if (side === 'a') setA(text)
     else setB(text)
   }
+
+  usePendingFiles('/diff', (pending) => { if (pending[0]) void onLoadFile(pending[0], 'a') })
+
+  useClipboardPaste(
+    (files) => {
+      const f = files[0]
+      if (!f) return
+      const side = document.activeElement === textB.current ? 'b' : 'a'
+      void onLoadFile(f, side)
+    },
+    { accept: '.txt,.md,.json,.csv', multiple: false },
+  )
 
   const onBeautifyExport = async () => {
     const el = diffRef.current?.querySelector('.diff-output') as HTMLElement | null
@@ -91,6 +107,7 @@ export default function TextDiff() {
             <input ref={fileA} type="file" accept=".txt,.md,.json,.csv" hidden onChange={(e) => { const f = e.target.files?.[0]; if (f) onLoadFile(f, 'a') }} />
           </div>
           <textarea
+            ref={textA}
             value={a}
             onChange={(e) => setA(e.target.value)}
             style={{ minHeight: 200, fontFamily: 'var(--font-mono)' }}
@@ -107,6 +124,7 @@ export default function TextDiff() {
             <input ref={fileB} type="file" accept=".txt,.md,.json,.csv" hidden onChange={(e) => { const f = e.target.files?.[0]; if (f) onLoadFile(f, 'b') }} />
           </div>
           <textarea
+            ref={textB}
             value={b}
             onChange={(e) => setB(e.target.value)}
             style={{ minHeight: 200, fontFamily: 'var(--font-mono)' }}

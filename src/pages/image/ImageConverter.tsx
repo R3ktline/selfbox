@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import ToolPage from '../../components/ToolPage'
+import Dropzone from '../../components/Dropzone'
 import {
   canvasToBlob,
   createPreviewUrl,
@@ -12,6 +13,7 @@ import {
 } from '../../lib/images'
 import { mapPool } from '../../lib/async'
 import { useToast } from '../../lib/toast'
+import { useClipboardPaste } from '../../lib/useClipboardPaste'
 import { usePendingFiles } from '../../lib/usePendingFiles'
 
 const TARGETS = [
@@ -60,6 +62,14 @@ export default function ImageConverter() {
       sourceImageRef.current = await fileToImage(f)
     }
   }
+
+  useClipboardPaste(
+    (files) => {
+      const f = files[0]
+      if (f) void onPick(f)
+    },
+    { accept: 'image/*,.heic,.heif', enabled: Boolean(file), multiple: false },
+  )
 
   usePendingFiles('/image/convert', (pending) => { if (pending[0]) void onPick(pending[0]) })
 
@@ -132,9 +142,15 @@ export default function ImageConverter() {
             style={{ display: 'none' }}
           />
           {!file ? (
-            <button type="button" className="btn primary upload-btn-large" onClick={() => fileInput.current?.click()}>
-              Choose an image
-            </button>
+            <Dropzone
+              accept="image/*,.heic,.heif"
+              label="Drop, choose, or paste an image"
+              hint="HEIC / HEIF supported · Ctrl/⌘+V to paste"
+              onFiles={(files) => {
+                const f = files[0]
+                if (f) void onPick(f)
+              }}
+            />
           ) : (
             <>
               <div className="file-info">

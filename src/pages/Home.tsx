@@ -2,6 +2,8 @@ import { useCallback, useEffect, useMemo, useRef, useState, type DragEvent, type
 import { href } from '../lib/router'
 import {
   formatFileList,
+  formatPastedTextLabel,
+  isPastedTextFile,
   navigateWithFiles,
   suggestToolsForFiles,
 } from '../lib/fileStore'
@@ -17,6 +19,7 @@ import {
   type ToolMeta,
 } from '../lib/tools'
 import { GroupIcon, ToolIcon } from '../components/ToolIcons'
+import { useHomePaste } from '../lib/useHomePaste'
 
 function setCardSpotlight(e: PointerEvent<HTMLElement>) {
   const el = e.currentTarget
@@ -212,6 +215,7 @@ export default function Home() {
   const [group, setGroup] = useState<HomeFilter>(() => loadHomeGroup())
   const mostUsed = useMemo(() => mostUsedTools(), [])
   const [files, setFiles] = useState<File[]>([])
+  const [pastedTextChars, setPastedTextChars] = useState<number | null>(null)
   const [dragOver, setDragOver] = useState(false)
   const [belowRevealed, setBelowRevealed] = useState(() => hasRevealedBelowThisSession())
   const [instantBelow, setInstantBelow] = useState(() => hasRevealedBelowThisSession())
@@ -347,6 +351,7 @@ export default function Home() {
 
   const addFiles = useCallback((list: FileList | null) => {
     if (!list || list.length === 0) return
+    setPastedTextChars(null)
     setFiles((prev) => {
       const names = new Set(prev.map((f) => `${f.name}:${f.size}`))
       const next = [...prev]
@@ -361,11 +366,25 @@ export default function Home() {
     })
   }, [])
 
+  const onPasteText = useCallback((text: string, file: File) => {
+    setFiles([file])
+    setPastedTextChars(text.length)
+  }, [])
+
+  useHomePaste({ onFiles: addFiles, onText: onPasteText })
+
   const removeFile = (index: number) => {
-    setFiles((prev) => prev.filter((_, i) => i !== index))
+    setFiles((prev) => {
+      const next = prev.filter((_, i) => i !== index)
+      if (next.length === 0 || !next.every(isPastedTextFile)) setPastedTextChars(null)
+      return next
+    })
   }
 
-  const clearFiles = () => setFiles([])
+  const clearFiles = () => {
+    setFiles([])
+    setPastedTextChars(null)
+  }
 
   const onNavigateWithFiles = (path: string) => {
     navigateWithFiles(path, files)
@@ -376,6 +395,14 @@ export default function Home() {
     setDragOver(false)
     if (e.dataTransfer.files.length) addFiles(e.dataTransfer.files)
   }
+
+  const uploadLabel = dragOver
+    ? 'Drop to add'
+    : pastedTextChars !== null
+      ? formatPastedTextLabel(pastedTextChars)
+      : files.length > 0
+        ? formatFileList(files)
+        : 'Drop or paste files'
 
   const showScrollHint = browsingAll && hintPhase !== 'gone'
   const belowVisible = belowRevealed || !browsingAll
@@ -404,13 +431,22 @@ export default function Home() {
         </label>
 
         <div className="home-action-row">
-          <div className="quick-access-panel" aria-label="Quick access tools">
+          <div
+            className={'quick-access-panel' + (query.trim() ? ' is-searching' : '')}
+            aria-label={query.trim() ? 'Search results' : 'Quick access tools'}
+          >
             <div className="quick-access-header">
-              <h2>{MOST_USED_META.label}</h2>
-              <p>{MOST_USED_META.desc}</p>
+              <h2>{query.trim() ? 'Results' : MOST_USED_META.label}</h2>
+              <p>
+                {query.trim()
+                  ? items.length === 0
+                    ? 'No tools match your filter.'
+                    : `${items.length} tool${items.length === 1 ? '' : 's'} — click to open`
+                  : MOST_USED_META.desc}
+              </p>
             </div>
             <div className="quick-access-grid">
-              {mostUsed.map((t) => (
+              {(query.trim() ? items : mostUsed).map((t) => (
                 <QuickAccessLink key={t.path} tool={t} files={files} onNavigate={onNavigateWithFiles} />
               ))}
             </div>
@@ -446,22 +482,33 @@ export default function Home() {
               <path d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2" strokeLinecap="round" />
             </svg>
             <div className="home-upload-square-text">
-              <strong>{dragOver ? 'Drop to add' : files.length > 0 ? formatFileList(files) : 'Drop files'}</strong>
-              <span className="meta">or click to browse</span>
+              <strong>{uploadLabel}</strong>
+              <span className="meta">
+                {pastedTextChars !== null ? 'Pick a tool below · paste again to replace' : 'click to browse · Ctrl/⌘+V to paste'}
+              </span>
             </div>
           </div>
         </div>
 
         {files.length > 0 && (
           <div className="home-file-chips">
-            {files.map((f, i) => (
-              <span key={`${f.name}-${f.size}-${i}`} className="file-chip">
-                {f.name}
-                <button type="button" aria-label={`Remove ${f.name}`} onClick={(e) => { e.stopPropagation(); removeFile(i) }}>
+            {pastedTextChars !== null && files.length === 1 && isPastedTextFile(files[0]) ? (
+              <span className="file-chip file-chip-text">
+                {formatPastedTextLabel(pastedTextChars)}
+                <button type="button" aria-label="Clear pasted text" onClick={(e) => { e.stopPropagation(); clearFiles() }}>
                   ×
                 </button>
               </span>
-            ))}
+            ) : (
+              files.map((f, i) => (
+                <span key={`${f.name}-${f.size}-${i}`} className="file-chip">
+                  {f.name}
+                  <button type="button" aria-label={`Remove ${f.name}`} onClick={(e) => { e.stopPropagation(); removeFile(i) }}>
+                    ×
+                  </button>
+                </span>
+              ))
+            )}
             <button type="button" className="btn-link file-chip-clear" onClick={clearFiles}>
               Clear all
             </button>
@@ -470,7 +517,7 @@ export default function Home() {
 
         {suggestions.length > 0 && (
           <section className="home-suggestions" aria-label="Suggested tools">
-            <h2>Suggested for your files</h2>
+            <h2>{pastedTextChars !== null ? 'Suggested for your text' : 'Suggested for your files'}</h2>
             <div className="tool-grid">
               {suggestions.map((t) => (
                 <SuggestedToolCard key={t.path} tool={t} onNavigate={onNavigateWithFiles} />

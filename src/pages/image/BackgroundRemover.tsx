@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import ToolPage from '../../components/ToolPage'
+import Dropzone from '../../components/Dropzone'
 import {
   canvasToBlob,
   createPreviewUrl,
@@ -9,6 +10,7 @@ import {
   imageToCanvas,
   revokePreviewUrl,
 } from '../../lib/images'
+import { useClipboardPaste } from '../../lib/useClipboardPaste'
 import { usePendingFiles } from '../../lib/usePendingFiles'
 
 type Method = 'auto' | 'white' | 'black' | 'green' | 'blue' | 'red' | 'magenta' | 'cyan' | 'yellow' | 'custom'
@@ -48,6 +50,14 @@ export default function BackgroundRemover() {
     sourceImageRef.current = await fileToImage(f)
     setResultUrl(null)
   }
+
+  useClipboardPaste(
+    (files) => {
+      const f = files[0]
+      if (f) void onPick(f)
+    },
+    { accept: 'image/*', enabled: Boolean(file), multiple: false },
+  )
 
   usePendingFiles('/image/background-remover', (pending) => { if (pending[0]) onPick(pending[0]) })
 
@@ -141,9 +151,15 @@ export default function BackgroundRemover() {
             style={{ display: 'none' }}
           />
           {!file ? (
-            <button type="button" className="btn primary upload-btn-large" onClick={() => fileInput.current?.click()}>
-              Choose an image
-            </button>
+            <Dropzone
+              accept="image/*"
+              label="Drop, choose, or paste an image"
+              hint="Ctrl/⌘+V works anywhere on this page"
+              onFiles={(files) => {
+                const f = files[0]
+                if (f) void onPick(f)
+              }}
+            />
           ) : (
             <>
               <div className="file-info">

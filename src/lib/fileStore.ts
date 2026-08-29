@@ -79,6 +79,11 @@ const TOOL_MATCHERS: { test: (files: File[]) => boolean; paths: string[] }[] = [
     ],
   },
   {
+    // Home paste: QR first, then the usual text/dev tools
+    test: (files) => files.length > 0 && files.every(isPastedTextFile),
+    paths: ['/qr', '/text', '/diff', '/base64', '/json', '/markdown'],
+  },
+  {
     test: (files) => files.some((f) => /\.(json|csv)$/i.test(f.name) || f.type === 'application/json'),
     paths: ['/json'],
   },
@@ -121,4 +126,46 @@ export function formatFileList(files: File[]): string {
   if (files.length === 1) return files[0].name
   if (files.length <= 3) return files.map((f) => f.name).join(', ')
   return `${files[0].name} + ${files.length - 1} more`
+}
+
+const PASTED_TEXT_NAME = /^pasted\.(txt|json|md|markdown|csv)$/i
+
+export function isPastedTextFile(f: File): boolean {
+  return PASTED_TEXT_NAME.test(f.name)
+}
+
+/** Turn clipboard text into a File with a sensible name/type for tool routing. */
+export function pastedTextToFile(text: string): File {
+  const trimmed = text.trim()
+  let name = 'pasted.txt'
+  let type = 'text/plain'
+
+  if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
+    try {
+      JSON.parse(trimmed)
+      name = 'pasted.json'
+      type = 'application/json'
+    } catch {
+      /* keep .txt */
+    }
+  } else if (
+    trimmed.startsWith('#') ||
+    /^#{1,6}\s/m.test(trimmed) ||
+    /^\s*[-*+]\s/m.test(trimmed)
+  ) {
+    name = 'pasted.md'
+    type = 'text/markdown'
+  } else {
+    const lines = trimmed.split('\n').filter((l) => l.trim())
+    if (lines.length >= 2 && lines[0].includes(',') && lines[1].includes(',')) {
+      name = 'pasted.csv'
+      type = 'text/csv'
+    }
+  }
+
+  return new File([text], name, { type, lastModified: Date.now() })
+}
+
+export function formatPastedTextLabel(charCount: number): string {
+  return `${charCount.toLocaleString()} character${charCount === 1 ? '' : 's'} pasted`
 }

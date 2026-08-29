@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import ToolPage from '../components/ToolPage'
 import Dropzone from '../components/Dropzone'
 import { downloadBlob, createPreviewUrl, revokePreviewUrl } from '../lib/images'
+import { useClipboardPaste } from '../lib/useClipboardPaste'
 import { usePendingFiles } from '../lib/usePendingFiles'
 
 const SIZES = [16, 32, 48, 64, 128, 180, 192, 256, 512]
@@ -151,6 +152,14 @@ export default function FaviconGenerator() {
 
   usePendingFiles('/favicon', (pending) => { if (pending[0]) void onPick(pending[0]) })
 
+  useClipboardPaste(
+    (files) => {
+      const f = files[0]
+      if (f) void onPick(f)
+    },
+    { accept: 'image/svg+xml,image/png,image/jpeg,image/webp', enabled: Boolean(source), multiple: false },
+  )
+
   const renderAt = (size: number) => {
     if (!source) throw new Error('No source')
     return renderPng(source, size, padding, bgColor || null)
@@ -200,8 +209,8 @@ export default function FaviconGenerator() {
           {!source ? (
             <Dropzone
               accept="image/svg+xml,image/png,image/jpeg,image/webp"
-              label="Choose or drop an SVG / PNG"
-              hint="Works best with square images"
+              label="Drop, choose, or paste an SVG / PNG"
+              hint="Works best with square images · Ctrl/⌘+V to paste"
               onFiles={(files) => {
                 const f = files[0]
                 if (f) onPick(f)

@@ -15,6 +15,7 @@ import {
   type SpellIssue,
 } from '../lib/spell-check'
 import { useToast } from '../lib/toast'
+import { useClipboardPaste } from '../lib/useClipboardPaste'
 import { usePendingFiles } from '../lib/usePendingFiles'
 
 import { convertCase, slugify, type CaseStyle } from '../lib/case-convert'
@@ -99,6 +100,14 @@ export default function TextTools() {
   }
 
   usePendingFiles('/text', (pending) => { if (pending[0]) void onImport(pending[0]) })
+
+  useClipboardPaste(
+    (files) => {
+      const f = files[0]
+      if (f) void onImport(f)
+    },
+    { accept: '.txt,.md,.json,.csv', multiple: false },
+  )
 
   const fixIssue = (issue: SpellIssue, replacement: string) => {
     setText((prev) => applyReplacement(prev, issue.index, issue.length, replacement))

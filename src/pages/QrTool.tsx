@@ -11,6 +11,17 @@ import BatchPanel from '../components/BatchPanel'
 import CollapsiblePanel from '../components/CollapsiblePanel'
 import { buildPayload } from '../lib/content'
 import { validateStyle } from '../lib/validation'
+import { readFileAsText } from '../lib/images'
+import { usePendingFiles } from '../lib/usePendingFiles'
+
+function contentFromPastedText(text: string): Content {
+  const trimmed = text.trim()
+  if (/^https?:\/\//i.test(trimmed) || /^www\./i.test(trimmed)) {
+    const url = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`
+    return { type: 'url', url }
+  }
+  return { type: 'text', text: trimmed }
+}
 
 export default function QrTool() {
   const [style, setStyle] = useState<StyleOptions>({
@@ -37,6 +48,12 @@ export default function QrTool() {
   })
   const [content, setContent] = useState<Content>({ type: 'url', url: 'https://example.com' })
   const [renderError, setRenderError] = useState<string | null>(null)
+
+  usePendingFiles('/qr', (pending) => {
+    const f = pending[0]
+    if (!f) return
+    void readFileAsText(f).then((text) => setContent(contentFromPastedText(text)))
+  })
 
   const payload = useMemo(() => buildPayload(content), [content])
   const warnings = useMemo(() => validateStyle(style, logo, payload), [style, logo, payload])

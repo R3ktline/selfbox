@@ -4,6 +4,7 @@ import Dropzone from '../../components/Dropzone'
 import ColorPicker from '../../components/ColorPicker'
 import { canvasToBlob, downloadBlob, fileToImage, formatBytes } from '../../lib/images'
 import { toFileList } from '../../lib/fileStore'
+import { useClipboardPaste } from '../../lib/useClipboardPaste'
 import { usePendingFiles } from '../../lib/usePendingFiles'
 
 type SideMode = 'redact' | 'text' | null
@@ -502,6 +503,8 @@ export default function ImageEditor() {
     if (pending.length) void onPick(toFileList(pending))
   })
 
+  useClipboardPaste(onPick, { accept: 'image/*', enabled: Boolean(img), multiple: false })
+
   useEffect(() => {
     if (!img || !wrapRef.current) return
     const update = () => {
@@ -902,7 +905,7 @@ export default function ImageEditor() {
       <div className={`img-editor-layout${img ? ' has-image' : ''}`}>
         {!img ? (
           <div className="img-editor-empty">
-            <Dropzone accept="image/*" label="Drop an image to start" onFiles={onPick} />
+            <Dropzone accept="image/*" label="Drop, choose, or paste an image" hint="Ctrl/⌘+V to paste" onFiles={onPick} />
           </div>
         ) : (
           <>

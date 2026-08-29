@@ -1,4 +1,5 @@
 import type { LogoOptions } from '../types'
+import { useClipboardPaste } from '../lib/useClipboardPaste'
 
 interface Props {
   logo: LogoOptions
@@ -9,9 +10,7 @@ export default function LogoUploader({ logo, onChange }: Props) {
   const upd = (patch: Partial<LogoOptions>) =>
     onChange({ ...logo, ...patch })
 
-  const onFile = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
+  const applyFile = (file: File) => {
     const reader = new FileReader()
     reader.onload = () => {
       upd({ dataUrl: String(reader.result) })
@@ -19,10 +18,24 @@ export default function LogoUploader({ logo, onChange }: Props) {
     reader.readAsDataURL(file)
   }
 
+  const onFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    applyFile(file)
+  }
+
+  useClipboardPaste(
+    (files) => {
+      const f = files[0]
+      if (f) applyFile(f)
+    },
+    { accept: 'image/*', multiple: false },
+  )
+
   return (
     <div className="panel panel-logo">
       <h2 className="panel-inline-title">Logo</h2>
-      <p className="panel-hint">Optional center image.</p>
+      <p className="panel-hint">Optional center image. Upload or paste (Ctrl/⌘+V).</p>
       <div className="logo-row">
         <label className="upload-btn">
           <input type="file" accept="image/*" onChange={onFile} hidden />

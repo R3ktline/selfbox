@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import ToolPage from '../components/ToolPage'
+import Dropzone from '../components/Dropzone'
 import { downloadBlob, createPreviewUrl, formatBytes, revokePreviewUrl } from '../lib/images'
 import { copyBlobToClipboard } from '../lib/clipboard'
 import { useToast } from '../lib/toast'
+import { useClipboardPaste } from '../lib/useClipboardPaste'
 import { usePendingFiles } from '../lib/usePendingFiles'
 import {
   BG_PRESETS,
@@ -49,30 +51,6 @@ export default function ScreenshotBeautifier() {
     }
     setResultUrl(null)
   }, [])
-
-  useEffect(() => {
-    const onPaste = async (e: ClipboardEvent) => {
-      const items = e.clipboardData?.items
-      if (!items) return
-      for (let i = 0; i < items.length; i++) {
-        const item = items[i]
-        if (item.type.startsWith('image/')) {
-          const f = item.getAsFile()
-          if (f) {
-            e.preventDefault()
-            setFile(f)
-            setOriginalSize(f.size)
-            setImageUrl(createPreviewUrl(f))
-            setWindowTitle(f.name.replace(/\.[^.]+$/, '') || 'screenshot')
-            revokeResult()
-            return
-          }
-        }
-      }
-    }
-    window.addEventListener('paste', onPaste)
-    return () => window.removeEventListener('paste', onPaste)
-  }, [revokeResult])
 
   useEffect(() => () => revokeResult(), [revokeResult])
 
@@ -153,6 +131,14 @@ export default function ScreenshotBeautifier() {
 
   usePendingFiles('/screenshot', (pending) => { if (pending[0]) void onPick(pending[0]) })
 
+  useClipboardPaste(
+    (files) => {
+      const f = files[0]
+      if (f) void onPick(f)
+    },
+    { accept: 'image/*', enabled: Boolean(imageUrl), multiple: false },
+  )
+
   const onCropPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     if (aspect === 'auto') return
     e.currentTarget.setPointerCapture(e.pointerId)
@@ -216,24 +202,15 @@ export default function ScreenshotBeautifier() {
             style={{ display: 'none' }}
           />
           {!imageUrl ? (
-            <div
-              className="dropzone"
-              onClick={() => fileInput.current?.click()}
-              onDragOver={(e) => e.preventDefault()}
-              onDrop={(e) => {
-                e.preventDefault()
-                const f = e.dataTransfer.files[0]
-                if (f) onPick(f)
+            <Dropzone
+              accept="image/*"
+              label="Drop, choose, or paste a screenshot"
+              hint="PNG, JPG · Ctrl/⌘+V works too"
+              onFiles={(files) => {
+                const f = files[0]
+                if (f) void onPick(f)
               }}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') fileInput.current?.click()
-              }}
-            >
-              <strong>Drop, choose, or paste a screenshot</strong>
-              <span className="meta">PNG, JPG · Ctrl/⌘+V works too</span>
-            </div>
+            />
           ) : (
             <>
               <div className="file-info">
