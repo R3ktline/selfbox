@@ -1,8 +1,27 @@
 import type { HistoryEntry, Preset } from '../types'
 
-const PRESETS_KEY = 'qrgen.presets.v1'
-const HISTORY_KEY = 'qrgen.history.v1'
+const PRESETS_KEY = 'selfbox.presets.v1'
+const HISTORY_KEY = 'selfbox.history.v1'
+const OLD_PRESETS_KEY = 'qrgen.presets.v1'
+const OLD_HISTORY_KEY = 'qrgen.history.v1'
 const MAX_HISTORY = 20
+
+function migrateStorageKey(oldKey: string, newKey: string): void {
+  try {
+    const raw = localStorage.getItem(oldKey)
+    if (raw && !localStorage.getItem(newKey)) {
+      localStorage.setItem(newKey, raw)
+      localStorage.removeItem(oldKey)
+    }
+  } catch {
+    /* ignore */
+  }
+}
+
+function migrateStorageKeys(): void {
+  migrateStorageKey(OLD_PRESETS_KEY, PRESETS_KEY)
+  migrateStorageKey(OLD_HISTORY_KEY, HISTORY_KEY)
+}
 
 function safeGet<T>(key: string, fallback: T): T {
   try {
@@ -23,6 +42,7 @@ function safeSet<T>(key: string, value: T): void {
 }
 
 export function loadPresets(): Preset[] {
+  migrateStorageKeys()
   return safeGet<Preset[]>(PRESETS_KEY, [])
 }
 
@@ -31,6 +51,7 @@ export function savePresets(presets: Preset[]): void {
 }
 
 export function loadHistory(): HistoryEntry[] {
+  migrateStorageKeys()
   return safeGet<HistoryEntry[]>(HISTORY_KEY, [])
 }
 
