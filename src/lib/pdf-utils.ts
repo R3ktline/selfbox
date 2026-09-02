@@ -369,7 +369,6 @@ function nearestLabelForBox(box: DrawnRect, items: TextItem[]): string {
     // Same visual row as the box (not labels from neighboring lines).
     if (baseline < box.y - 3 || baseline > box.y + box.h + 6) continue
     if (Math.abs(baseline - midY) > box.h * 0.85 + 4) continue
-    const left = item.transform[4]
     const right = labelRightEdge(item)
     if (right > box.x + 4) continue
     const dist = box.x - right
