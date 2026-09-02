@@ -1014,7 +1014,13 @@ export default function PdfFillSign() {
         const size = Math.max(6, t.fontSize * height)
         const { r, g, b } = hexToRgb(t.color)
         const lines = (t.text || ' ').split('\n')
-        let lineY = height - t.y * height - size * 0.85
+        const boxTopPdf = height - t.y * height
+        // Boxed fields: match preview flex `align-items: center` (optical mid ≈ baseline + 0.35em).
+        // Free text: baseline just below the click point.
+        let lineY =
+          t.h != null && t.h > 0
+            ? boxTopPdf - (t.h * height) / 2 - size * 0.35
+            : boxTopPdf - size * 0.85
         const maxWidth = t.w != null ? t.w * width : undefined
         for (const line of lines) {
           const safe = line.replace(/[^\x20-\x7E]/g, '?')
