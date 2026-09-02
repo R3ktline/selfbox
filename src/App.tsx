@@ -32,6 +32,7 @@ const PdfSplitExportTool = lazy(() => import('./pages/pdf/PdfSplitExportTool'))
 const PdfFromImagesTool = lazy(() => import('./pages/pdf/PdfFromImagesTool'))
 const PdfOcrTool = lazy(() => import('./pages/pdf/PdfOcrTool'))
 const PdfOptimizeTool = lazy(() => import('./pages/pdf/PdfOptimizeTool'))
+const PdfFillSignTool = lazy(() => import('./pages/pdf/PdfFillSignTool'))
 const FaviconGenerator = lazy(() => import('./pages/FaviconGenerator'))
 const ScreenshotBeautifier = lazy(() => import('./pages/ScreenshotBeautifier'))
 const MarkdownExport = lazy(() => import('./pages/MarkdownExport'))
@@ -167,6 +168,7 @@ function AppShell() {
             {route.name === 'pdf-from-images' && <PdfFromImagesTool />}
             {route.name === 'pdf-ocr' && <PdfOcrTool />}
             {route.name === 'pdf-optimize' && <PdfOptimizeTool />}
+            {route.name === 'pdf-fill-sign' && <PdfFillSignTool />}
             {route.name === 'favicon' && <FaviconGenerator />}
             {route.name === 'screenshot' && <ScreenshotBeautifier />}
             {route.name === 'markdown' && <MarkdownExport />}

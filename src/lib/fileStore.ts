@@ -57,7 +57,7 @@ function isText(f: File): boolean {
 const TOOL_MATCHERS: { test: (files: File[]) => boolean; paths: string[] }[] = [
   {
     test: (files) => files.length > 0 && files.every(isPdf),
-    paths: ['/pdf/pages', '/pdf/split-export', '/pdf/ocr', '/pdf/optimize'],
+    paths: ['/pdf/pages', '/pdf/split-export', '/pdf/ocr', '/pdf/optimize', '/pdf/fill-sign'],
   },
   {
     test: (files) => files.some(isGif),

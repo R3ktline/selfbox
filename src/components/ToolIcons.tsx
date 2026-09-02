@@ -25,6 +25,7 @@ export type ToolIconId =
   | 'pdf-images'
   | 'pdf-ocr'
   | 'pdf-optimize'
+  | 'pdf-fill-sign'
   | 'gif'
   | 'edit'
 
@@ -182,6 +183,14 @@ const ICONS: Record<ToolIconId, ReactNode> = {
     <path d="M7 3h7l5 5v13a1 1 0 01-1 1H7a1 1 0 01-1-1V4a1 1 0 011-1z" />
     <path d="M14 3v5h5" />
     <path d="M9 17l2-3 2 3 2-5" />
+  </>
+  ),
+  'pdf-fill-sign': (
+  <>
+    <path d="M7 3h7l5 5v13a1 1 0 01-1 1H7a1 1 0 01-1-1V4a1 1 0 011-1z" />
+    <path d="M14 3v5h5" />
+    <path d="M8 13h6M8 16h4" />
+    <path d="M15 18c1.5-2.5 3-3.5 5-4" strokeLinecap="round" />
   </>
   ),
   gif: (

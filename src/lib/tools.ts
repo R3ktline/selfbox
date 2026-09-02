@@ -52,7 +52,7 @@ export const GROUP_META: Record<
   PDF: {
     label: 'PDF',
     tagline: 'Document tools',
-    desc: 'Merge, split, rotate, compress, watermark, OCR, and convert between PDF and images.',
+    desc: 'Merge, split, rotate, compress, watermark, fill & sign, OCR, and convert between PDF and images.',
   },
   Dev: {
     label: 'Dev',
@@ -165,6 +165,15 @@ export const TOOLS: ToolMeta[] = [
     group: 'PDF',
     icon: 'pdf-optimize',
     keywords: 'compress watermark optimize shrink',
+  },
+  {
+    path: '/pdf/fill-sign',
+    title: 'Fill & Sign',
+    short: 'Fill & Sign',
+    desc: 'Add text and draw signatures on PDFs. Mobile-friendly, local flatten.',
+    group: 'PDF',
+    icon: 'pdf-fill-sign',
+    keywords: 'fill sign annotate text signature draw form',
   },
   {
     path: '/favicon',
@@ -315,6 +324,7 @@ export const PAGE_TITLES: Record<string, string> = {
   'pdf-from-images': 'Image to PDF — Toolbox',
   'pdf-ocr': 'Extract Text from PDF — Toolbox',
   'pdf-optimize': 'PDF Optimize — Toolbox',
+  'pdf-fill-sign': 'Fill & Sign — Toolbox',
   favicon: 'Favicon Generator — Toolbox',
   screenshot: 'Screenshot Beautifier — Toolbox',
   markdown: 'Markdown Export — Toolbox',

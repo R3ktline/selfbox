@@ -13,6 +13,7 @@ export type RouteName =
   | 'pdf-from-images'
   | 'pdf-ocr'
   | 'pdf-optimize'
+  | 'pdf-fill-sign'
   | 'favicon'
   | 'screenshot'
   | 'markdown'
@@ -45,6 +46,7 @@ const ROUTES: Record<string, Exclude<RouteName, 'not-found'>> = {
   '/pdf/from-images': 'pdf-from-images',
   '/pdf/ocr': 'pdf-ocr',
   '/pdf/optimize': 'pdf-optimize',
+  '/pdf/fill-sign': 'pdf-fill-sign',
   '/favicon': 'favicon',
   '/screenshot': 'screenshot',
   '/markdown': 'markdown',

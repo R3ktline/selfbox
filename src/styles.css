@@ -2262,7 +2262,9 @@ button.suggested-tool-card {
   align-items: start;
 }
 .tool-body:has(.pdf-layout),
-.tool-body:has(.img-editor-layout) {
+.tool-body:has(.img-editor-layout),
+.tool-body:has(.pdf-fill-layout),
+.tool-body:has(.pdf-fill-empty) {
   grid-template-columns: 1fr;
 }
 .tools-grid-2col {
@@ -4450,5 +4452,449 @@ button.suggested-tool-card {
   .pdf-page-grid .page-thumb,
   .pdf-image-thumb {
     height: 180px;
+  }
+}
+
+/* =========================================================
+   PDF Fill & Sign
+   ========================================================= */
+.pdf-fill-empty {
+  max-width: 520px;
+}
+
+.pdf-fill-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+  padding-bottom: 88px;
+}
+
+.pdf-fill-viewer {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: min(62vh, 640px);
+  max-height: min(70vh, 780px);
+  padding: 12px;
+  overflow: auto;
+  background:
+    linear-gradient(180deg, var(--bg-2), var(--bg-3)),
+    repeating-conic-gradient(var(--bg-3) 0% 25%, var(--bg-2) 0% 50%) 50% / 18px 18px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  touch-action: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.pdf-fill-loading {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  margin: 0;
+  padding: 6px 12px;
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.pdf-fill-stage {
+  position: relative;
+  flex-shrink: 0;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.22);
+  background: #fff;
+  touch-action: none;
+  user-select: none;
+  cursor: crosshair;
+}
+
+.pdf-fill-page {
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.pdf-fill-overlay {
+  position: absolute;
+  inset: 0;
+}
+
+.pdf-fill-ann {
+  position: absolute;
+  touch-action: none;
+  cursor: grab;
+}
+
+.pdf-fill-ann:active {
+  cursor: grabbing;
+}
+
+.pdf-fill-text {
+  max-width: 80%;
+  padding: 2px 4px;
+  white-space: pre-wrap;
+  line-height: 1.25;
+  font-family: Helvetica, Arial, sans-serif;
+  border: 1.5px dashed transparent;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.pdf-fill-text.boxed {
+  max-width: none;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: clip;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  padding: 0 4px;
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.pdf-fill-text-popover {
+  z-index: 4;
+}
+
+.pdf-fill-field-hotspot {
+  position: absolute;
+  z-index: 1;
+  padding: 0;
+  margin: 0;
+  border: 1.5px solid color-mix(in srgb, var(--accent, #4b6bff) 55%, transparent);
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--accent, #4b6bff) 14%, transparent);
+  cursor: pointer;
+  touch-action: manipulation;
+  box-sizing: border-box;
+}
+
+.pdf-fill-field-hotspot.is-check {
+  border-radius: 4px;
+}
+
+.pdf-fill-field-hotspot.filled {
+  border-color: color-mix(in srgb, #22c55e 70%, transparent);
+  background: color-mix(in srgb, #22c55e 12%, transparent);
+}
+
+.pdf-fill-field-hotspot.active {
+  border-color: var(--accent, #4b6bff);
+  box-shadow: 0 0 0 2px rgba(75, 107, 255, 0.35);
+  background: color-mix(in srgb, var(--accent, #4b6bff) 22%, transparent);
+}
+
+.pdf-fill-field-hotspot:focus-visible {
+  outline: 2px solid var(--accent, #4b6bff);
+  outline-offset: 1px;
+}
+
+.pdf-fill-text.selected {
+  border-color: var(--accent, #4b6bff);
+  background: rgba(75, 107, 255, 0.08);
+  box-shadow: 0 0 0 2px rgba(75, 107, 255, 0.2);
+}
+
+.pdf-fill-stamp {
+  border: 1.5px dashed transparent;
+  border-radius: 4px;
+}
+
+.pdf-fill-stamp.selected {
+  border-color: var(--accent, #4b6bff);
+  box-shadow: 0 0 0 2px rgba(75, 107, 255, 0.2);
+}
+
+.pdf-fill-mark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px dashed transparent;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.pdf-fill-mark.selected {
+  border-color: var(--accent, #4b6bff);
+  background: rgba(75, 107, 255, 0.08);
+  box-shadow: 0 0 0 2px rgba(75, 107, 255, 0.2);
+}
+
+.pdf-fill-mark-svg {
+  width: 88%;
+  height: 88%;
+  display: block;
+  pointer-events: none;
+}
+
+.pdf-fill-mark-kind-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.pdf-fill-mark-kind-btn {
+  min-height: 40px;
+  font-weight: 600;
+}
+
+.pdf-fill-mark-kind-btn.active {
+  border-color: var(--accent, #4b6bff);
+  background: color-mix(in srgb, var(--accent, #4b6bff) 18%, var(--bg-3));
+}
+
+.pdf-fill-stamp img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.pdf-fill-resize {
+  position: absolute;
+  right: -10px;
+  bottom: -10px;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 2px solid #fff;
+  border-radius: 4px;
+  background: var(--accent, #4b6bff);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+  cursor: nwse-resize;
+  touch-action: none;
+}
+
+.pdf-fill-text-sheet {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 14px;
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.pdf-fill-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.pdf-fill-field span,
+.pdf-fill-field-label {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.pdf-fill-field textarea {
+  width: 100%;
+  min-height: 64px;
+  font-size: 16px;
+  resize: vertical;
+}
+
+.pdf-fill-sheet-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  align-items: end;
+}
+
+.pdf-fill-sheet-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.pdf-fill-rail {
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 8px calc(10px + env(safe-area-inset-bottom, 0px));
+  margin: 0 -4px;
+  background: color-mix(in srgb, var(--bg-2) 92%, transparent);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 -6px 20px rgba(0, 0, 0, 0.12);
+}
+
+.pdf-fill-rail-modes,
+.pdf-fill-rail-nav,
+.pdf-fill-rail-zoom,
+.pdf-fill-rail-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pdf-fill-rail-actions {
+  margin-left: auto;
+}
+
+.pdf-fill-rail-btn {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-3);
+  color: var(--fg);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.pdf-fill-rail-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.pdf-fill-rail-btn.active {
+  border-color: var(--accent, #4b6bff);
+  background: color-mix(in srgb, var(--accent, #4b6bff) 18%, var(--bg-3));
+  color: var(--fg);
+}
+
+.pdf-fill-page-label {
+  min-width: 3.2em;
+  text-align: center;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+}
+
+.pdf-fill-download {
+  min-height: 44px;
+  padding-inline: 16px;
+}
+
+.pdf-fill-message,
+.pdf-fill-meta {
+  margin: 0;
+}
+
+.pdf-fill-sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.pdf-fill-sign-sheet {
+  width: min(560px, 100%);
+  max-height: min(90vh, 640px);
+  overflow: auto;
+  padding: 16px;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 16px 16px 12px 12px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+}
+
+.pdf-fill-sign-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.pdf-fill-sign-head h2 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.pdf-fill-sign-canvas-wrap {
+  margin: 10px 0 14px;
+  border: 1px solid var(--border-strong, var(--border));
+  border-radius: var(--radius-sm);
+  background: #fff;
+  overflow: hidden;
+  touch-action: none;
+}
+
+.pdf-fill-sign-canvas {
+  display: block;
+  width: 100%;
+  touch-action: none;
+  cursor: crosshair;
+}
+
+.pdf-fill-sign-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.pdf-fill-sign-actions .btn-link {
+  margin-right: auto;
+}
+
+@media (min-width: 720px) {
+  .pdf-fill-sheet-backdrop {
+    align-items: center;
+  }
+
+  .pdf-fill-sign-sheet {
+    border-radius: var(--radius);
+  }
+}
+
+@media (max-width: 700px) {
+  .pdf-fill-layout {
+    padding-bottom: 96px;
+  }
+
+  .pdf-fill-viewer {
+    min-height: min(58vh, 520px);
+    max-height: min(62vh, 560px);
+    padding: 8px;
+  }
+
+  .pdf-fill-rail {
+    position: fixed;
+    left: 8px;
+    right: 8px;
+    bottom: 8px;
+    margin: 0;
+  }
+
+  .pdf-fill-rail-zoom {
+    display: none;
+  }
+
+  .pdf-fill-sheet-row {
+    grid-template-columns: 1fr;
+  }
+
+  .pdf-fill-text-popover.img-editor-text-popover {
+    position: fixed;
+    left: 12px !important;
+    right: 12px;
+    top: auto !important;
+    bottom: calc(72px + env(safe-area-inset-bottom, 0px));
+    width: auto;
+    max-width: none;
+    z-index: 30;
   }
 }

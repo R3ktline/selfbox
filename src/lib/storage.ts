@@ -2,6 +2,7 @@ import type { HistoryEntry, Preset } from '../types'
 
 const PRESETS_KEY = 'selfbox.presets.v1'
 const HISTORY_KEY = 'selfbox.history.v1'
+const SIGNATURE_KEY = 'selfbox.pdf.signature.v1'
 const OLD_PRESETS_KEY = 'qrgen.presets.v1'
 const OLD_HISTORY_KEY = 'qrgen.history.v1'
 const MAX_HISTORY = 20
@@ -61,4 +62,29 @@ export function saveHistory(entries: HistoryEntry[]): void {
 
 export function newId(): string {
   return Math.random().toString(36).slice(2, 10) + Date.now().toString(36)
+}
+
+export function loadSavedSignature(): string | null {
+  try {
+    const raw = localStorage.getItem(SIGNATURE_KEY)
+    if (!raw) return null
+    // Stored as a PNG data URL string (not JSON-wrapped) to save a little space.
+    if (raw.startsWith('data:image/')) return raw
+    const parsed = JSON.parse(raw) as unknown
+    return typeof parsed === 'string' && parsed.startsWith('data:image/') ? parsed : null
+  } catch {
+    return null
+  }
+}
+
+export function saveSavedSignature(dataUrl: string | null): void {
+  try {
+    if (!dataUrl) {
+      localStorage.removeItem(SIGNATURE_KEY)
+      return
+    }
+    localStorage.setItem(SIGNATURE_KEY, dataUrl)
+  } catch {
+    /* quota or disabled — ignore */
+  }
 }
